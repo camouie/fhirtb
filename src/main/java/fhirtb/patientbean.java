@@ -63,7 +63,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 	            	Patient p = (Patient) entry.getResource();
 	            	this.patients.add(p);
 	            	System.out.println(p.getNameFirstRep().getFamilyAsSingleString());
-	                
+	                System.out.println("test pour git");
 	            });
 	            
 	        } catch (Exception e) {

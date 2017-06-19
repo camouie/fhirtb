@@ -8,13 +8,11 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
 
-
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Patient;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.composite.BaseHumanNameDt;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
@@ -25,7 +23,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 
 		public void getPatientsByLastname(){
 	    	
-	    	FhirContext ctx = FhirContext.forDstu2();
+	    	FhirContext ctx = FhirContext.forDstu3();
 			//String serverBaseUrl = "http://sqlonfhir-stu3.azurewebsites.net/fhir";
 			String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu2";
 			
@@ -39,6 +37,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 	        // create the RESTful client to work with our FHIR server 
 	        IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 			
+	        
 
 	        try {
 	            // search for the resource created
@@ -62,8 +61,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 	            	//populate the list with the retrieved bundle's resources
 	            	Patient p = (Patient) entry.getResource();
 	            	this.patients.add(p);
-	            	System.out.println(p.getNameFirstRep().getFamilyAsSingleString());
-	                System.out.println("test pour git encore et encore");
+	            	System.out.println(p.getNameFirstRep().getNameAsSingleString());
 	            });
 	            
 	        } catch (Exception e) {

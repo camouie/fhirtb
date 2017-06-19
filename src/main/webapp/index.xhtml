@@ -30,10 +30,11 @@
 								value="#{patient.getNameFirstRep().getGivenAsSingleString()}"></h:outputText>
 						</td>
 						<td><h:outputText
-								value="#{patient.getNameFirstRep().getNameAsSingleString()}"></h:outputText>
+								value="#{patient.getNameFirstRep().getFamily()}"></h:outputText>
 						</td>
-						<td><h:outputText value="#{patient.getBirthDate().toString()}"></h:outputText>
-						</td>
+						<td><h:outputText value="#{patient.getBirthDate()}">
+								<f:convertDateTime pattern="dd.MM.yyyy" />
+							</h:outputText></td>
 					</tr>
 				</ui:repeat>
 			</table>

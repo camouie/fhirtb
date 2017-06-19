@@ -6,15 +6,43 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core">
 
-<ui:composition template="">
-	<ui:define name="header">
-	    Add your header here or delete to use the default
-	</ui:define>
+<ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
 	<ui:define name="content">
-	    Add your content here or delete to use the default
-	</ui:define>
-	<ui:define name="footer">
-	    Add your footer here or delete to use the default
+
+		<h:form>
+
+			<fieldset>
+
+				<legend>Register a Patient</legend>
+
+				<h:outputLabel for="firstname">Firstname<span
+						class="requis">*</span>
+				</h:outputLabel>
+
+				<h:inputText id="firstname" binding="#{inputfn}" required="true"
+					size="20" maxlength="60" />
+
+
+				<br />
+
+				<h:outputLabel for="lastname">Lastname<span
+						class="requis">*</span>
+				</h:outputLabel>
+
+				<h:inputText id="lastname" binding="#{inputln}" required="true"
+					size="20" maxlength="60" />
+
+				<br />
+
+				<h:commandButton value="Register"
+					action="#{patientbean.addPatient(inputfn.value, inputln.value)}"
+					styleClass="sansLabel" />
+
+				<br />
+
+			</fieldset>
+
+		</h:form>
 	</ui:define>
 </ui:composition>
 </html>

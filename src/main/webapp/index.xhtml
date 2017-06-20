@@ -4,41 +4,65 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:f="http://java.sun.com/jsf/core">
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+	
+<head>
+<h:outputStylesheet name="resources/bootstrap/css/bootstrap.css" />
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" />
+<h:outputScript name="resources/bootstrap/js/bootstrap.js" />
+	
+</head>
 
 <ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
 	<ui:define name="content">
-		<h2>Search for patients by lastname</h2>
+		<h2>Patients</h2>
 		<h:form>
-			<h:inputText value="#{patientbean.lastname}" />
-			<h:commandButton value="Chercher"
-				action="#{patientbean.getPatientsByLastname}" />
+		 <div class="col-xs-3">
+			<h:inputText value="#{patientbean.lastname}"  styleClass="form-control"
+				 pt:placeholder="Search by Lastname" />
+				 </div>
+			<h:commandLink id="btnsearch"
+				action="#{patientbean.getPatientsByLastname}"
+				styleClass="btn btn-default">
+				<i class="icon-search"></i> Search
+</h:commandLink>
 			<br />
 
-			<table>
-				<tr>
-					<td>Logical ID</td>
-					<td>Firstname</td>
-					<td>Lastname</td>
-					<td>Birthdate</td>
-				</tr>
-				<ui:repeat value="#{patientbean.patients}" var="patient">
-					<tr>
-						<td><h:link value="#{patient.getIdElement().getIdPart()}">
-							</h:link></td>
-						<td><h:outputText
-								value="#{patient.getNameFirstRep().getGivenAsSingleString()}"></h:outputText>
-						</td>
-						<td><h:outputText
-								value="#{patient.getNameFirstRep().getFamily()}"></h:outputText>
-						</td>
-						<td><h:outputText value="#{patient.getBirthDate()}">
-								<f:convertDateTime pattern="dd.MM.yyyy" />
-							</h:outputText></td>
-					</tr>
-				</ui:repeat>
-			</table>
+			<div class="row col-md-6 col-md-offset-2 custyle">
+				<table class="table table-striped custab">
+					<thead>
+						<tr>
+							<td>Logical ID</td>
+							<td>Firstname</td>
+							<td>Lastname</td>
+							<td>Birthdate</td>
+						</tr>
+					</thead>
+					<ui:repeat value="#{patientbean.patients}" var="patient">
+						<tr>
+							<td><h:link value="#{patient.getIdElement().getIdPart()}">
+								</h:link></td>
+							<td><h:outputText
+									value="#{patient.getNameFirstRep().getGivenAsSingleString()}"></h:outputText>
+							</td>
+							<td><h:outputText
+									value="#{patient.getNameFirstRep().getFamily()}"></h:outputText>
+							</td>
+							<td><h:outputText value="#{patient.getBirthDate()}">
+									<f:convertDateTime pattern="dd.MM.yyyy" />
+								</h:outputText></td>
 
+							<td class="text-center"><a class='btn btn-info btn-xs'
+								href="#"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+								<a href="#" class="btn btn-danger btn-xs"><span
+									class="glyphicon glyphicon-remove"></span> Del</a></td>
+
+						</tr>
+					</ui:repeat>
+				</table>
+			</div>
 		</h:form>
 	</ui:define>
 </ui:composition>

@@ -1,6 +1,7 @@
 package fhirtb;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -19,11 +20,12 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 
 	public class patientbean {
 		
-		public String lastname;
+		private String lastname;
 		private List<Patient> patients;
 		IGenericClient client;
 		FhirContext ctx;
-		public Patient patient;
+		private Patient patient;
+		private Date birthdate;
 		
 		@PostConstruct
 		public void fhircontext () {
@@ -76,7 +78,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 	    	
 	    }
 		
-		public void addPatient(String firstname, String lastname){
+		public void addPatient(String firstname, String lastname, String prefix){
 			
 	        
 	        this.patient = new Patient();
@@ -84,9 +86,9 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 			 Random randomGenerator = new Random();
 			 int randomInt = randomGenerator.nextInt(10000000);
 		
-			 String prefix = "Mr";
 			 
 	        this.patient.addName().addPrefix(prefix).setFamily(lastname).addGiven(firstname); 
+	        this.patient.setBirthDate(this.birthdate);
 	        this.patient.addIdentifier()
 	                .setSystem("tb:fhir")
 	                .setValue("CP"+randomInt);
@@ -114,14 +116,12 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 		public String getLastname() {return this.lastname;}
 		public List<Patient> getPatients() {return patients;}
 		public void setPatients(List<Patient> patients) {this.patients = patients;}
-
-		public Patient getPatient() {
-			return patient;
-		}
-
-		public void setPatient(Patient patient) {
-			this.patient = patient;
-		}
+		public Patient getPatient() {return patient;}
+		public void setPatient(Patient patient) {this.patient = patient;}
+		public Date getBirthdate() {return birthdate;}
+		public void setBirthdate(Date birthdate) {this.birthdate = birthdate;}
+		
+		
 		
 
 }

@@ -7,7 +7,7 @@
 	<managed-bean>
 		<managed-bean-name>patientbean</managed-bean-name>
 		<managed-bean-class>fhirtb.patientbean</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
+		<managed-bean-scope>view</managed-bean-scope>
 	</managed-bean>
 
 </faces-config>

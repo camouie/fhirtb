@@ -17,21 +17,20 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
-
+	
 	public class patientbean {
 		
 		private String lastname;
 		private List<Patient> patients;
-		IGenericClient client;
 		FhirContext ctx;
 		private Patient patient;
 		private Date birthdate;
+		private String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
 		
 		@PostConstruct
 		public void fhircontext () {
 			this.ctx = FhirContext.forDstu3();
-			//String serverBaseUrl = "http://sqlonfhir-stu3.azurewebsites.net/fhir";
-			String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
+			//serverBaseUrl = "http://sqlonfhir-stu3.azurewebsites.net/fhir";
 			
 			// Disable server validation (don't pull the server's metadata first)
 			ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -40,15 +39,18 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 			ctx.getRestfulClientFactory().setConnectTimeout(60 * 1000);
 	        ctx.getRestfulClientFactory().setSocketTimeout(60 * 1000);
 	        
-	        // create the RESTful client to work with our FHIR server 
-	        this.client = ctx.newRestfulGenericClient(serverBaseUrl);
+	        this.patients = new ArrayList<Patient>();
+	        
 
 		}
 
 		public void getPatientsByLastname(){
+			// create the RESTful client to work with our FHIR server 
+			IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+	        
 	        try {
 	            // search for the resource created
-	            Bundle response = this.client.search()
+	            Bundle response = client.search()
 	                    .forResource(Patient.class)
 	                    .where(Patient.FAMILY.matches().values(this.lastname))
 	                    .returnBundle(Bundle.class)
@@ -59,6 +61,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 	            
 	            //initialize the patients list
 	            this.patients = new ArrayList<Patient>();
+	            System.out.println("j'initialize la liste de patients");
 	            
 	            response.getEntry().forEach((entry) -> {
 	            	IParser jParser = this.ctx.newJsonParser().setPrettyPrint(true);
@@ -80,7 +83,8 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 		
 		public void addPatient(String firstname, String lastname, String prefix){
 			
-	        
+			IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+			
 	        this.patient = new Patient();
 			
 			 Random randomGenerator = new Random();
@@ -94,7 +98,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 	                .setValue("CP"+randomInt);
 	        
 	        try {
-	            MethodOutcome outcome = this.client.create()
+	            MethodOutcome outcome = client.create()
 	                    .resource(this.patient)
 	                    .prettyPrint()
 	                    .encodedJson()

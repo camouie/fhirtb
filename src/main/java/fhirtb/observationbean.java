@@ -45,7 +45,7 @@ public class observationbean {
 	}
 	
 	public void load(){
-		//set the current patient's id
+		//set the current patient's id from the url parameter
 		this.logicalID = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
                 .get("logicalid");
 		

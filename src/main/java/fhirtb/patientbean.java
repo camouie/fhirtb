@@ -22,10 +22,10 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 		
 		private String lastname;
 		private List<Patient> patients;
-		FhirContext ctx;
 		private Patient patient;
 		private Date birthdate;
 		private String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
+		FhirContext ctx;
 		
 		@PostConstruct
 		public void fhircontext () {
@@ -43,7 +43,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 	        
 
 		}
-
+		//get a bundle of all the patients  by a lastname search
 		public void getPatientsByLastname(){
 			// create the RESTful client to work with our FHIR server 
 			IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
@@ -71,7 +71,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 	            	//populate the list with the retrieved bundle's resources
 	            	Patient p = (Patient) entry.getResource();
 	            	this.patients.add(p);
-	            	System.out.println(p.getNameFirstRep().getFamily());
+	            	System.out.println("----------------" + p.getName().toString());
 	            });
 	            
 	        } catch (Exception e) {
@@ -80,7 +80,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 	        } 
 	    	
 	    }
-		
+		//add a patient resource onto the server
 		public void addPatient(String firstname, String lastname, String prefix){
 			
 			IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);

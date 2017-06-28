@@ -42,7 +42,7 @@
 					</thead>
 					<ui:repeat value="#{patientbean.patients}" var="patient">
 						<tr>
-							<td><h:link value="#{patient.getIdElement().getIdPart()}">
+							<td><h:link value="#{patient.getIdElement().getIdPart()}" binding="#{putid}"	>
 								</h:link></td>
 							<td><h:outputText
 									value="#{patient.getNameFirstRep().getGivenAsSingleString()}"></h:outputText>
@@ -54,10 +54,14 @@
 									<f:convertDateTime pattern="dd.MM.yyyy" />
 								</h:outputText></td>
 
-							<td class="text-center"><a class='btn btn-info btn-xs'
-								href="#"><span class="glyphicon glyphicon-edit"></span> Edit</a>
-								<a href="#" class="btn btn-danger btn-xs"><span
+							<td class="text-center">
+							<h:link value="Edit" outcome="patient" class='btn btn-info btn-xs'>
+							<f:param name="logicalid" value="#{putid.value}"></f:param>
+							</h:link>
+
+							<a href="#" class="btn btn-danger btn-xs"><span
 									class="glyphicon glyphicon-remove"></span> Del</a></td>
+
 
 						</tr>
 					</ui:repeat>

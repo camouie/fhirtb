@@ -1,7 +1,5 @@
 package fhirtb;
 
-import java.math.BigDecimal;
-
 import javax.annotation.PostConstruct;
 import javax.faces.context.FacesContext;
 
@@ -32,11 +30,10 @@ public class observationbean {
 	private String serverBaseUrl = "http://spark.furore.com/fhir";
 	private FhirContext ctx;
 	private Patient patient;
-	private BigDecimal bodyWeight;
+	private Double bodyWeight;
 	private Observation Obodyweight;
 	
-
-
+	
 	@PostConstruct
 	public void fhircontext () {
 		System.out.println("observation bean reporting for duty");
@@ -52,9 +49,8 @@ public class observationbean {
         ctx.getRestfulClientFactory().setSocketTimeout(60 * 1000);
         
         this.setPatient(new Patient());
-        this.bodyWeight = new BigDecimal(0.0);
-
-    	
+        this.setBodyWeight(2.0);
+        System.out.println("at construct, bodyweight = " + bodyWeight);
     
 	}
 	
@@ -102,13 +98,11 @@ public class observationbean {
 	
 	public void setVariablesFromResources() throws FHIRException{
 		if(Obodyweight.hasValueQuantity()==true){
-		this.bodyWeight = Obodyweight.getValueQuantity().getValue();
+		this.bodyWeight = Obodyweight.getValueQuantity().getValueElement().getValueAsNumber().doubleValue();
 		}
 	}
 	
-	public void updateAllObs(double bodyweight){
-		this.bodyWeight = new BigDecimal(bodyweight);
-		System.out.println("value of bodayweight once in BigDecimal is" + this.bodyWeight);
+	public void updateAllObs(){
 		updateBodyWeight();
 		
 	}
@@ -178,6 +172,7 @@ public class observationbean {
 	
 	public void updateBodyWeight(){
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		System.out.println("when saving bodyweight variable is at " + this.bodyWeight);
 		
 		// Create a quantity datatype
 		Quantity value = new Quantity();
@@ -202,9 +197,15 @@ public class observationbean {
 	public void setLogicalID(String logicalID) {this.logicalID = logicalID;}
 	public Patient getPatient() {return patient;}
 	public void setPatient(Patient patient) {this.patient = patient;}
-	public BigDecimal getBodyWeight() {return bodyWeight;}
-	public void setBodyWeight(BigDecimal bodyWeight) {this.bodyWeight = bodyWeight;}
 	public Observation getOBodyweight() {return Obodyweight;}
 	public void setOBodyweight(Observation bodyweight) {this.Obodyweight = bodyweight;}
+
+	public Double getBodyWeight() {
+		return bodyWeight;
+	}
+
+	public void setBodyWeight(Double bodyWeight) {
+		this.bodyWeight = bodyWeight;
+	}
 
 }

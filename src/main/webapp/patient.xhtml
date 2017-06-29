@@ -15,6 +15,7 @@
 	<c:set var="patient" value="#{observationbean.patient}" />
 	
 	   <div class="row col-md-6 col-md-offset-2 custyle">
+	   <h:form>
 				<table class="table table-striped custab">
 					<thead>
 						<tr>
@@ -43,7 +44,7 @@
 									class="glyphicon glyphicon-remove"></span> Del</a></td>
 
 						</tr>
-						<tr><h:form>
+						<tr>
 				<td>
 				
 				<h:outputLabel for="weight">Body Weight<span
@@ -51,19 +52,20 @@
 				</h:outputLabel>
 				</td>
 				 	 <td width="250px">
-				<h:inputText id="weight" converterId="javax.faces.Double"  binding="#{inputbw}" size="20" maxlength="60"  styleClass="form-control"><f:converter converterId="javax.faces.BigDecimal" />
-					</h:inputText>
-</td></h:form>
-				</tr>
+				<h:inputText id="weight" value="#{observationbean.bodyWeight}" size="20" maxlength="60"  styleClass="form-control">
+				<f:convertNumber pattern="#0.0" />
+				</h:inputText>
+				
+				</td></tr>
 						<tr><td>
-						<h:form>
+					
 						<h:commandButton value="Save"
-					action="#{observationbean.updateAllObs(inputbw.value)}"
+					action="#{observationbean.updateAllObs()}"
 					styleClass="btn btn-default" />
-					</h:form>
+				
 					</td></tr>
 			</table>
-			
+				</h:form>
 			</div>
 	</ui:define>
 </ui:composition>

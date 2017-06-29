@@ -24,7 +24,8 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 		private List<Patient> patients;
 		private Patient patient;
 		private Date birthdate;
-		private String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
+		//private String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
+		private String serverBaseUrl = "http://spark.furore.com/fhir";
 		FhirContext ctx;
 		
 		@PostConstruct

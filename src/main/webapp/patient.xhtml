@@ -43,7 +43,27 @@
 									class="glyphicon glyphicon-remove"></span> Del</a></td>
 
 						</tr>
+						<tr><h:form>
+				<td>
+				
+				<h:outputLabel for="weight">Body Weight<span
+						class="requis">*</span>
+				</h:outputLabel>
+				</td>
+				 	 <td width="250px">
+				<h:inputText id="weight" converterId="javax.faces.Double"  binding="#{inputbw}" size="20" maxlength="60"  styleClass="form-control"><f:converter converterId="javax.faces.BigDecimal" />
+					</h:inputText>
+</td></h:form>
+				</tr>
+						<tr><td>
+						<h:form>
+						<h:commandButton value="Save"
+					action="#{observationbean.updateAllObs(inputbw.value)}"
+					styleClass="btn btn-default" />
+					</h:form>
+					</td></tr>
 			</table>
+			
 			</div>
 	</ui:define>
 </ui:composition>

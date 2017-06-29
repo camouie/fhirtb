@@ -1,29 +1,42 @@
 package fhirtb;
 
+import java.math.BigDecimal;
+
 import javax.annotation.PostConstruct;
 import javax.faces.context.FacesContext;
 
 import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
+import org.hl7.fhir.exceptions.FHIRException;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
+
 import org.hl7.fhir.dstu3.model.Bundle;
+
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 public class observationbean {
 	
 	private String logicalID;
-	private String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
+	//private String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
+	private String serverBaseUrl = "http://spark.furore.com/fhir";
 	private FhirContext ctx;
 	private Patient patient;
-	private double bodyWeight;
+	private BigDecimal bodyWeight;
+	private Observation Obodyweight;
 	
+
+
 	@PostConstruct
 	public void fhircontext () {
 		System.out.println("observation bean reporting for duty");
@@ -39,17 +52,18 @@ public class observationbean {
         ctx.getRestfulClientFactory().setSocketTimeout(60 * 1000);
         
         this.setPatient(new Patient());
+        this.bodyWeight = new BigDecimal(0.0);
 
     	
     
 	}
 	
-	public void load(){
+	public void load() throws FHIRException{
 		//set the current patient's id from the url parameter
 		this.logicalID = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
                 .get("logicalid");
 		
-		System.out.println("-------//------LOAD PATIENT WITH ID "+ logicalID);
+		System.out.println("------LOAD PATIENT WITH ID "+ logicalID);
 		
 		if(logicalID!=null){
 	        //get the patient based on the ID
@@ -69,31 +83,71 @@ public class observationbean {
 		            System.out.println("An error occurred trying to search:");
 		            e.printStackTrace();
 		        } 
-
+	    	 
+	    	 this.getPatientBodyWeight();
+	    	 this.CreateResources();
+	    	 this.setVariablesFromResources();
+	    	 
 	       		
 	    	}
 		
 	}
+	public void CreateResources(){
+		if(this.Obodyweight==null){
+   		 this.CreateBodyWeightResource();
+   		 this.getPatientBodyWeight();
+   	 }
+		
+	}
 	
-	//get a patient by its ID and get his vital signs
-	public void getPatientObs(){
+	public void setVariablesFromResources() throws FHIRException{
+		if(Obodyweight.hasValueQuantity()==true){
+		this.bodyWeight = Obodyweight.getValueQuantity().getValue();
+		}
+	}
+	
+	public void updateAllObs(double bodyweight){
+		this.bodyWeight = new BigDecimal(bodyweight);
+		System.out.println("value of bodayweight once in BigDecimal is" + this.bodyWeight);
+		updateBodyWeight();
+		
+	}
+	
+	//get a patient bodyweight using its ID
+	public void getPatientBodyWeight(){
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		
+		try {
+			Bundle response = client.search().forResource(Observation.class)
+					.where(new TokenClientParam("code").exactly().code("29463-7"))
+					.where(new ReferenceClientParam("patient").hasId(this.patient.getIdElement().getIdPart()))
+					.prettyPrint()
+					.returnBundle(Bundle.class)
+					.execute();
+			if(response.getEntry().isEmpty() == false)
+			this.setOBodyweight((Observation) response.getEntry().get(0).getResource());
+
+            
+        } catch (DataFormatException e) {
+            System.out.println("An error occurred trying to get Body Weight observation:");
+            e.printStackTrace();
+        }	
 				
 	}
 	//set the bodyweight of the patient given its ID
-	public void setPatientBodyWeight(){
+	public void CreateBodyWeightResource(){
+		System.out.println("Body weight method called");
+		
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		
 		// Create an Observation instance
 		Observation observation = new Observation();
 		
-		observation.setSubject(new Reference(this.logicalID));
+		observation.setSubject(new Reference(this.patient));
 		  
 		// Give the observation a code (what kind of observation is this)
 		Coding coding = observation.getCode().addCoding();
 		coding.setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight");
-		 
-		// Create a quantity datatype
-		Quantity value = new Quantity();
-		value.setValue(this.bodyWeight).setSystem("http://unitsofmeasure.org").setCode("kg");
-		observation.setValue(value);
 		 
 		// Set the reference range
 		SimpleQuantity low = new SimpleQuantity();
@@ -105,25 +159,52 @@ public class observationbean {
 		observation.getReferenceRangeFirstRep().setHigh(high);
 		
 		//put on the server
+		try {
+            MethodOutcome outcome = client.create()
+                    .resource(observation)
+                    .prettyPrint()
+                    .encodedJson()
+                    .execute();
+
+            IdType id = (IdType) outcome.getId();
+            System.out.println("Resource is available at: " + id.getValue());
+
+            
+        } catch (DataFormatException e) {
+            System.out.println("An error occurred trying to upload:");
+            e.printStackTrace();
+        }
+	}
+	
+	public void updateBodyWeight(){
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		
+		// Create a quantity datatype
+		Quantity value = new Quantity();
+		value.setValue(this.bodyWeight).setSystem("http://unitsofmeasure.org").setCode("kg");
+		this.Obodyweight.setValue(value);
+		
+		try{
+		MethodOutcome outcome = client.update()
+				   .resource(this.Obodyweight)
+				   .execute();
+		
+		IdType id = (IdType) outcome.getId();
+        System.out.println("UPDATED Resource is available at: " + id.getValue());
+		
+		} catch (DataFormatException e) {
+            System.out.println("An error occurred trying to update bodyweight:");
+            e.printStackTrace();
+        }
 	}
 
 	public String getLogicalID() {return logicalID;}
 	public void setLogicalID(String logicalID) {this.logicalID = logicalID;}
-
-	public Patient getPatient() {
-		return patient;
-	}
-
-	public void setPatient(Patient patient) {
-		this.patient = patient;
-	}
-
-	public double getBodyWeight() {
-		return bodyWeight;
-	}
-
-	public void setBodyWeight(double bodyWeight) {
-		this.bodyWeight = bodyWeight;
-	}
+	public Patient getPatient() {return patient;}
+	public void setPatient(Patient patient) {this.patient = patient;}
+	public BigDecimal getBodyWeight() {return bodyWeight;}
+	public void setBodyWeight(BigDecimal bodyWeight) {this.bodyWeight = bodyWeight;}
+	public Observation getOBodyweight() {return Obodyweight;}
+	public void setOBodyweight(Observation bodyweight) {this.Obodyweight = bodyweight;}
 
 }

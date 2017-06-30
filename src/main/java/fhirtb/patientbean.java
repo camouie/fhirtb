@@ -91,7 +91,6 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 			 Random randomGenerator = new Random();
 			 int randomInt = randomGenerator.nextInt(10000000);
 		
-			 
 	        this.patient.addName().addPrefix(prefix).setFamily(lastname).addGiven(firstname); 
 	        this.patient.setBirthDate(this.birthdate);
 	        this.patient.addIdentifier()

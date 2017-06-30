@@ -6,23 +6,23 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
-	
+
 <head>
 <h:outputStylesheet name="resources/bootstrap/css/bootstrap.css" />
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" />
 <h:outputScript name="resources/bootstrap/js/bootstrap.js" />
-	
+
 </head>
 
 <ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
 	<ui:define name="content">
 		<h2>Patients</h2>
 		<h:form>
-		 <div class="col-xs-3">
-			<h:inputText value="#{patientbean.lastname}"  styleClass="form-control"
-				 pt:placeholder="Search by Lastname" />
-				 </div>
+			<div class="col-xs-3">
+				<h:inputText value="#{patientbean.lastname}"
+					styleClass="form-control" pt:placeholder="Search by Lastname" />
+			</div>
 			<h:commandLink id="btnsearch"
 				action="#{patientbean.getPatientsByLastname}"
 				styleClass="btn btn-default">
@@ -42,7 +42,8 @@
 					</thead>
 					<ui:repeat value="#{patientbean.patients}" var="patient">
 						<tr>
-							<td><h:link value="#{patient.getIdElement().getIdPart()}" binding="#{putid}"	>
+							<td><h:link value="#{patient.getIdElement().getIdPart()}"
+									binding="#{putid}">
 								</h:link></td>
 							<td><h:outputText
 									value="#{patient.getNameFirstRep().getGivenAsSingleString()}"></h:outputText>
@@ -54,12 +55,10 @@
 									<f:convertDateTime pattern="dd.MM.yyyy" />
 								</h:outputText></td>
 
-							<td class="text-center">
-							<h:link value="Edit" outcome="patient" class='btn btn-info btn-xs'>
-							<f:param name="logicalid" value="#{putid.value}"></f:param>
-							</h:link>
-
-							<a href="#" class="btn btn-danger btn-xs"><span
+							<td class="text-center"><h:link value="Edit"
+									outcome="patient" class='btn btn-info btn-xs'>
+									<f:param name="logicalid" value="#{putid.value}"></f:param>
+								</h:link> <a href="#" class="btn btn-danger btn-xs"><span
 									class="glyphicon glyphicon-remove"></span> Del</a></td>
 
 

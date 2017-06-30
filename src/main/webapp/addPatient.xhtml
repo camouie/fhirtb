@@ -5,99 +5,85 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core">
-	
-	<head>
-	<style type="text/css">
-	.aligned {
-	 margin-left: 2cm;
-	}
-	</style>		
+
+<head>
+<style type="text/css">
+.aligned {
+	margin-left: 2cm;
+}
+</style>
 </head>
 
 <ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
 	<ui:define name="content">
 		<h:form>
-		<div class="aligned">
-			<table cellpadding="10">
-				<tr>
-				<td>
-				<h3>Register a Patient</h3>
-				</td>
-				<td></td>
-				</tr>
-				<tr>
-				<td>
-				<h:outputLabel for="firstname">Firstname<span
-						class="requis">*</span>
-				</h:outputLabel>
-								</td>
-				 <td width="250px">
-				<h:inputText id="firstname" binding="#{inputfn}" required="true"
-					size="20" maxlength="60"  styleClass="form-control" />
-				</td>
-				</tr>
-				<tr>
-				<td height="10px"></td>
-				<td></td>
-				</tr>
-<tr>
-				<td>
-				<h:outputLabel for="lastname">Lastname<span
-						class="requis">*</span>
-				</h:outputLabel>
-				</td>
-				 	 <td width="250px">
-				<h:inputText id="lastname" binding="#{inputln}" required="true"
-					size="20" maxlength="60"  styleClass="form-control" />
-</td>
-				</tr>
-				<tr>
-				<td height="10px"></td>
-				<td></td>
-				</tr>
-				<tr>
-				<td>
-				<h:outputLabel for="prefix">Prefix<span
-						class="requis">*</span>
-				</h:outputLabel>
-				</td>
-					 <td width="250px">
-				<h:inputText id="prefix" binding="#{inputp}" required="true"
-					size="20" maxlength="60"   styleClass="form-control"/>
-</td>
-				</tr>
-				<tr>
-				<td height="10px"></td>
-				<td></td>
-				</tr>
-				
-				<tr>
-				<td>
-				
-				<h:outputLabel for="lastname">Birthdate<span
-						class="requis">* (yyyy-MM-dd)</span>
-				</h:outputLabel>
-				</td>
-					 <td width="250px">
-				<h:inputText value="#{patientbean.birthdate}" required="true" size="20" maxlength="60"  styleClass="form-control">
-					<f:convertDateTime pattern="yyyy-MM-dd"  />
-				</h:inputText>
-				</td>
-				</tr>
-				<tr>
-				<td height="10px"></td>
-				<td></td>
-				</tr>
-				
-	<tr>
-	<td></td>
-				<td>
-				<h:commandButton value="Register"
-					action="#{patientbean.addPatient(inputfn.value, inputln.value, inputp.value)}"
-					styleClass="btn btn-default" />
-</td>
-				</tr>
-			</table>
+			<div class="aligned">
+				<table cellpadding="10">
+					<tr>
+						<td>
+							<h3>Register a Patient</h3>
+						</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="firstname">Firstname<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="firstname"
+								binding="#{inputfn}" required="true" size="20" maxlength="60"
+								styleClass="form-control" /></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="lastname">Lastname<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="lastname"
+								binding="#{inputln}" required="true" size="20" maxlength="60"
+								styleClass="form-control" /></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="prefix">Prefix<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="prefix"
+								binding="#{inputp}" required="true" size="20" maxlength="60"
+								styleClass="form-control" /></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td><h:outputLabel for="lastname">Birthdate<span
+									class="requis">* (yyyy-MM-dd)</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText
+								value="#{patientbean.birthdate}" required="true" size="20"
+								maxlength="60" styleClass="form-control">
+								<f:convertDateTime pattern="yyyy-MM-dd" />
+							</h:inputText></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td><h:commandButton value="Register"
+								action="#{patientbean.addPatient(inputfn.value, inputln.value, inputp.value)}"
+								styleClass="btn btn-default" /></td>
+					</tr>
+				</table>
 			</div>
 
 		</h:form>

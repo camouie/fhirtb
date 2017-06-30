@@ -24,14 +24,13 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 		private List<Patient> patients;
 		private Patient patient;
 		private Date birthdate;
-		//private String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
-		private String serverBaseUrl = "http://spark.furore.com/fhir";
+		private String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
+		//private String serverBaseUrl = "http://spark.furore.com/fhir";
 		FhirContext ctx;
 		
 		@PostConstruct
 		public void fhircontext () {
 			this.ctx = FhirContext.forDstu3();
-			//serverBaseUrl = "http://sqlonfhir-stu3.azurewebsites.net/fhir";
 			
 			// Disable server validation (don't pull the server's metadata first)
 			ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);

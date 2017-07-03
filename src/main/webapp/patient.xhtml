@@ -74,11 +74,21 @@
 						<td></td>
 					</tr>
 					<tr>
-						<td><h:outputLabel for="weight">Body Weight<span
+						<td><h:outputLabel for="weight">Body Weight (kg - #.#)<span
 									class="requis">*</span>
 							</h:outputLabel></td>
 						<td width="250px"><h:inputText id="weight"
 								value="#{observationbean.bodyWeight}" size="20" maxlength="60"
+								styleClass="form-control">
+								<f:convertNumber pattern="#0.0" />
+							</h:inputText></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="height">Body Height (cm - #.#)<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="height"
+								value="#{observationbean.bodyHeight}" size="20" maxlength="60"
 								styleClass="form-control">
 								<f:convertNumber pattern="#0.0" />
 							</h:inputText></td>

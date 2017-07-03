@@ -6,14 +6,10 @@ import java.util.Date;
 import javax.annotation.PostConstruct;
 import javax.faces.context.FacesContext;
 
-import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 
@@ -24,37 +20,53 @@ import org.hl7.fhir.dstu3.model.Bundle;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 public class observationbean {
-
+	//HTTP parameter
 	private String logicalID;
+	//references and FHIR connection
 	private Fhircontextconnection fco;
+	private String serverBaseUrl;
+	private FhirContext ctx;
+	private VitalSignsHandler bwhandler;
+	//object for the resources in the bean
 	private Patient patient;
-	private Double bodyWeight;
 	private Observation Obodyweight;
+	private Observation ObodyHeight;
+	//page inputs
 	private String lastname;
 	private String firstname;
 	private Date birthdate;
 	private String prefix;
+	private Double bodyWeight;
+	private Double bodyHeight;
+	
+	//resources ID (when not saving the whole resource)
 	private String bodyweightID;
-	private String serverBaseUrl;
-	private FhirContext ctx;
+	private String bodyheightID;
 
 	@PostConstruct
 	public void fhircontext() {
 		System.out.println("observation bean reporting for duty");
 		
+		this.FhirCo();
+		//initialize objects
+		this.setPatient(new Patient());
+		this.setObodyweight(new Observation());
+		this.setObodyHeight(new Observation());
+		//default values
+		this.setBodyWeight(0.0);
+		this.setBodyHeight(0.0);
+		System.out.println("at construct, bodyweight = " + bodyWeight);
+		System.out.println("at construct, bodyheight = " + bodyHeight);
+		this.bwhandler = new VitalSignsHandler();
+
+	}
+	public void FhirCo(){
 		this.fco = new Fhircontextconnection();
 		this.serverBaseUrl = fco.getServerBaseUrl();
 		this.ctx = fco.getCtx();
-
-		this.setPatient(new Patient());
-		this.setOBodyweight(new Observation());
-		this.setBodyWeight(0.0);
-		System.out.println("at construct, bodyweight = " + bodyWeight);
-
 	}
 
 	/*
@@ -70,8 +82,8 @@ public class observationbean {
 
 		if (logicalID != null) {
 			this.getPatientbyID();
-			this.getPatientBodyWeight();
-			this.CreateResources();
+			this.SetBodyWeightResource();
+			this.SetBodyHeightResource();
 			this.setVariablesFromResources();
 
 		}
@@ -107,30 +119,52 @@ public class observationbean {
 	/*
 	 * Calling the methods for the resources creations
 	 */
-	public void CreateResources() throws FHIRException {
+	public void SetBodyWeightResource() throws FHIRException {
+		System.out.println("SetBodyWeight method called");
+		this.FhirCo();
+		String code = "bodyweight";
+		//get the patient's bodyweight
+		this.setObodyweight(bwhandler.getPatientVital(this.patient, code));
+		//if the bodyweight resource gotten is empty means we need to create one for the patient
 		if (this.Obodyweight.isEmpty()) {
-			this.CreateBodyWeightResource();
-			// ask for the resoucre on the server and set the bean proprety with
+			this.bodyweightID = bwhandler.CreateVitalResource(this.patient, this.bodyWeight, code);
+			// ask for the resource on the server and set the bean property with
 			// it
-			this.getPatientBodyWeightbyID();
+			this.setObodyweight(bwhandler.getPatientVitalsbyID(this.bodyweightID));
 		}
 
+	}
+	
+	public void SetBodyHeightResource() throws FHIRException{
+		this.FhirCo();
+		System.out.println("SetBodyHeight method called");
+		String code = "bodyheight";
+		//get the patient's bodyweight
+		this.setObodyHeight(bwhandler.getPatientVital(this.patient, code));
+		//if the bodyweight resource gotten is empty means we need to create one for the patient
+		if (this.ObodyHeight.isEmpty()) {
+			this.bodyheightID = bwhandler.CreateVitalResource(this.patient, this.bodyHeight, code);
+			// ask for the resource on the server and set the bean property with
+			// it
+			this.setObodyHeight(bwhandler.getPatientVitalsbyID(this.bodyheightID));
+		}
+		
 	}
 
 	/*
 	 * Setting the bean properties with the existing values of the resources
 	 * when available
 	 */
-	public void setVariablesFromResources() {
+	public void setVariablesFromResources() throws FHIRException {
 		// if none have been set yet, default value will be 0.0
 		if (this.Obodyweight.hasValueQuantity()) {
-			try {
 				this.bodyWeight = this.Obodyweight.getValueQuantity().getValueElement().getValueAsNumber()
 						.doubleValue();
-			} catch (FHIRException e) {
-				e.printStackTrace();
-			}
-		}
+			} 
+		if (this.ObodyHeight.hasValueQuantity()) {
+			this.bodyHeight = this.ObodyHeight.getValueQuantity().getValueElement().getValueAsNumber()
+					.doubleValue();
+		} 
 
 	}
 
@@ -139,113 +173,13 @@ public class observationbean {
 	 * with the inputs values then redirects to the main page "index"
 	 */
 	public String updateAllObs() {
-		updateBodyWeight();
+		bwhandler.updateVitalResource(this.bodyWeight, this.Obodyweight, "bodyweight");
+		bwhandler.updateVitalResource(this.bodyHeight, this.ObodyHeight, "bodyheight");
 		updatePatient();
 		return "index?faces-redirect=true";
 
 	}
-
-	/*
-	 * Get the patient bodyweight resource, if it has one set the bean property
-	 * OBodyweight with the resource gotten from server
-	 */
-	public void getPatientBodyWeight() {
-		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
-
-		try {
-			Bundle response = client.search().forResource(Observation.class)
-					.where(new TokenClientParam("code").exactly().code("29463-7"))
-					.where(new ReferenceClientParam("patient").hasId(this.patient.getIdElement().getIdPart()))
-					.prettyPrint().returnBundle(Bundle.class).execute();
-			// if we get a resource from the server, we set the Obodyweight
-			// object with it
-			if (response.getEntry().isEmpty() == false) {
-				this.setOBodyweight((Observation) response.getEntry().get(0).getResource());
-				System.out.println("Obodyweight set form server resource");
-			}
-
-		} catch (DataFormatException e) {
-			System.out.println("An error occurred trying to get Body Weight observation:");
-			e.printStackTrace();
-		}
-	}
-
-	/*
-	 * Create the bodyweight observation resource for patient not having one
-	 * already
-	 */
-	public void CreateBodyWeightResource() throws FHIRException {
-		System.out.println("Create Bodyweight method called");
-
-		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
-
-		// Create an Observation instance
-		Observation observation = new Observation();
-
-		observation.setSubject(new Reference(this.patient));
-
-		// Give the observation a code (what kind of observation is this)
-		Coding coding = observation.getCode().addCoding();
-		coding.setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight");
-
-		// Create a default quantity
-		Quantity value = new Quantity();
-		value.setValue(this.bodyWeight).setSystem("http://unitsofmeasure.org").setCode("kg");
-		observation.setValue(value);
-
-		// Set the reference range
-		SimpleQuantity low = new SimpleQuantity();
-		low.setValue(45).setSystem("http://unitsofmeasure.org").setCode("kg");
-		observation.getReferenceRangeFirstRep().setLow(low);
-
-		SimpleQuantity high = new SimpleQuantity();
-		low.setValue(90).setSystem("http://unitsofmeasure.org").setCode("kg");
-		observation.getReferenceRangeFirstRep().setHigh(high);
-
-		// put on the server
-		try {
-			MethodOutcome outcome = client.create().resource(observation).prettyPrint().encodedJson().execute();
-
-			IdType id = (IdType) outcome.getId();
-			this.bodyweightID = outcome.getId().getIdPart();
-			System.out.println("Resource is available at: " + id.getValue());
-			System.out.println("Bodyweight Id = " + this.bodyweightID);
-
-		} catch (DataFormatException e) {
-			System.out.println("An error occurred trying to upload:");
-			e.printStackTrace();
-		}
-
-	}
-
-	/*
-	 * When saving the input weight value we update the weight observatinon
-	 * resource of the patient with the entered value
-	 */
-	public void updateBodyWeight() {
-
-		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
-		System.out.println("when saving bodyweight variable is at " + this.bodyWeight);
-
-		// Create a quantity datatype
-		Quantity value = new Quantity();
-		value.setValue(this.bodyWeight).setSystem("http://unitsofmeasure.org").setCode("kg");
-		this.Obodyweight.setValue(value);
-
-		System.out.println("when Updating Obodyweight ID is: " + this.Obodyweight.getId());
-
-		try {
-			MethodOutcome outcome = client.update().resource(this.Obodyweight).execute();
-
-			IdType id = (IdType) outcome.getId();
-			System.out.println("UPDATED Resource is available at: " + id.getValue());
-
-		} catch (DataFormatException e) {
-			System.out.println("An error occurred trying to update bodyweight:");
-			e.printStackTrace();
-		}
-	}
-
+	
 	public void updatePatient() {
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
@@ -282,30 +216,11 @@ public class observationbean {
 
 	}
 	
-	/*
-	 * retrieve an Observation bodyweight resource based on its id
-	 */
-	private void getPatientBodyWeightbyID() {
-
-		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
-
-		try {
-			Bundle response = client.search().forResource(Observation.class)
-					.where(new TokenClientParam("_id").exactly().code(this.bodyweightID)).prettyPrint()
-					.returnBundle(Bundle.class).execute();
-
-			this.setOBodyweight((Observation) response.getEntry().get(0).getResource());
-			System.out.println("Obodyweight set in bean and is at " + Obodyweight.getId());
-
-		} catch (Exception e) {
-			System.out.println("An error occurred trying to search:");
-			e.printStackTrace();
-		}
-	}
+	
 	/*
 	 * Getters and setters methods for the bean properties
 	 */
-
+	
 	public String getLogicalID() {
 		return logicalID;
 	}
@@ -322,20 +237,20 @@ public class observationbean {
 		this.patient = patient;
 	}
 
-	public Observation getOBodyweight() {
-		return Obodyweight;
-	}
-
-	public void setOBodyweight(Observation bodyweight) {
-		this.Obodyweight = bodyweight;
-	}
-
 	public Double getBodyWeight() {
 		return bodyWeight;
 	}
 
 	public void setBodyWeight(Double bodyWeight) {
 		this.bodyWeight = bodyWeight;
+	}
+
+	public Observation getObodyweight() {
+		return Obodyweight;
+	}
+
+	public void setObodyweight(Observation obodyweight) {
+		Obodyweight = obodyweight;
 	}
 
 	public String getLastname() {
@@ -370,6 +285,14 @@ public class observationbean {
 		this.prefix = prefix;
 	}
 
+	public VitalSignsHandler getBwhandler() {
+		return bwhandler;
+	}
+
+	public void setBwhandler(VitalSignsHandler bwhandler) {
+		this.bwhandler = bwhandler;
+	}
+
 	public String getBodyweightID() {
 		return bodyweightID;
 	}
@@ -377,5 +300,26 @@ public class observationbean {
 	public void setBodyweightID(String bodyweightID) {
 		this.bodyweightID = bodyweightID;
 	}
+	public Observation getObodyHeight() {
+		return ObodyHeight;
+	}
+	public void setObodyHeight(Observation obodyHeight) {
+		ObodyHeight = obodyHeight;
+	}
+	public String getBodyheightID() {
+		return bodyheightID;
+	}
+	public void setBodyheightID(String bodyheightID) {
+		this.bodyheightID = bodyheightID;
+	}
+	public Double getBodyHeight() {
+		return bodyHeight;
+	}
+	public void setBodyHeight(Double bodyHeight) {
+		this.bodyHeight = bodyHeight;
+	}
+	
+	
+	
 
 }

@@ -73,7 +73,7 @@ public class observationbean {
 	 * method called in prerenderview to get the patient and observation
 	 * resources before rendering the page "patient"
 	 */
-	public void load() throws FHIRException {
+	public void load() throws FHIRException, InterruptedException {
 		// set the current patient's id from the url parameter
 		this.logicalID = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				.get("logicalid");

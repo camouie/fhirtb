@@ -32,6 +32,10 @@ public class patientbean {
 	private String doctorid;
 	private String patientid;
 
+	// DB query parameter to add a patient account
+	private String password;
+	private String email;
+
 	private String serverBaseUrl;
 	private FhirContext ctx;
 	private Fhircontextconnection fco;
@@ -99,7 +103,7 @@ public class patientbean {
 	 * firstname, the lastname and the prefix the birthdate is taken from the
 	 * bean proprety
 	 */
-	public void addPatient(String firstname, String lastname, String prefix) {
+	public void addPatient(String firstname, String lastname, String prefix) throws ClassNotFoundException {
 
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
@@ -121,19 +125,20 @@ public class patientbean {
 		List<Reference> ref = new ArrayList<Reference>();
 		ref.add(new Reference(this.doctor));
 		this.patient.setGeneralPractitioner(ref);
-		
-		
+
 		System.out.println("doctor added has name : " + this.doctor.getNameFirstRep().getFamily());
 		System.out.println("DOCTOR SET FOR PATIENT");
-		
+
 		try {
 			MethodOutcome outcome = client.create().resource(this.patient).prettyPrint().encodedJson().execute();
 
 			IdType id = (IdType) outcome.getId();
 			System.out.println("Resource is available at: " + id.getValue());
 			this.patientid = id.getIdPart();
+			//create the observation now, because of latencies of some test servers
 			this.createOBSforPatient();
-			
+			//create an account for the patient in the DB so he can login later on
+			this.createPatientAccount();
 
 		} catch (DataFormatException e) {
 			System.out.println("An error occurred trying to upload:");
@@ -191,8 +196,8 @@ public class patientbean {
 			e.printStackTrace();
 		}
 	}
-	
-	public void createOBSforPatient(){
+
+	public void createOBSforPatient() {
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
 		try {
@@ -211,6 +216,13 @@ public class patientbean {
 		}
 	}
 
+	/*
+	 * method to create a patient account in the DB
+	 */
+	public void createPatientAccount() throws ClassNotFoundException {
+		DAO dao = new DAO();
+		dao.addPatientAccount(this.email, this.password, this.patientid, this.doctorid);
+	}
 	/*
 	 * Getters and setters methods
 	 */
@@ -278,7 +290,21 @@ public class patientbean {
 	public void setPatientid(String patientid) {
 		this.patientid = patientid;
 	}
-	
-	
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
 }

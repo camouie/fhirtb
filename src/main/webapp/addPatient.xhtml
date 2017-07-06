@@ -16,6 +16,9 @@
 
 <ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
 	<ui:define name="content">
+	
+	<f:event type="preRenderView" listener="#{patientbean.load()}" />
+	
 		<h:form>
 			<div class="aligned">
 				<table cellpadding="10">
@@ -76,6 +79,20 @@
 						<td height="10px"></td>
 						<td></td>
 					</tr>
+					<tr>
+						<td><h:outputLabel for="lastname">Select a Doctor<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:selectOneMenu value="#{patientbean.doctorid}">
+    <f:selectItems value="#{patientbean.doctors}" var="doctor" itemValue="#{doctor.getIdElement().getIdPart()}" itemLabel="#{doctor.getNameFirstRep().getFamily()}"/>
+</h:selectOneMenu></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+					
+					
 
 					<tr>
 						<td></td>

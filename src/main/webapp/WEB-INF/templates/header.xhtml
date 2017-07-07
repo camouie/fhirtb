@@ -25,13 +25,15 @@
 
 			</div>
 			<div class="navbar-collapse collapse">
+			<h:form>
 				<ul class="nav navbar-nav navbar-right">
-					<li><h:link value="Register Patient" outcome="addPatient" /></li>
-					<li><h:link value="Register Doctor" outcome="addPractitioner" /></li>
-					<li><h:form>
+					<li><h:link value="Register Patient" outcome="addPatient" rendered="#{loginbean.admin}" /></li>
+					<li><h:link value="Register Doctor" outcome="addPractitioner" rendered="#{loginbean.admin}" /></li>
+					<li>
 							<h:commandLink value="logout" action="#{loginbean.logout}"/>
-						</h:form></li>
+						</li>
 				</ul>
+				</h:form>
 			</div>
 		</div>
 	</div>

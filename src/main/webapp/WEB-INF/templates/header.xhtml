@@ -18,17 +18,19 @@
 						class="icon-bar"></span> <span class="icon-bar"></span> <span
 						class="icon-bar"></span>
 				</button>
-				<h:graphicImage value="resources/images/fhir.png" width="40"
+				<h:graphicImage value="../resources/images/fhir.png" width="40"
 					height="40" />
-				<h:link value="FHIR test app" outcome="index" styleClass="navbar-brand"/>
-				
+				<h:link value="FHIR test app" outcome="index"
+					styleClass="navbar-brand" />
+
 			</div>
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav navbar-right">
 					<li><h:link value="Register Patient" outcome="addPatient" /></li>
 					<li><h:link value="Register Doctor" outcome="addPractitioner" /></li>
-					<li><a href="#">Nothing</a></li>
-					<li><a href="#">Nothing</a></li>
+					<li><h:form>
+							<h:commandLink value="logout" action="#{loginbean.logout}"/>
+						</h:form></li>
 				</ul>
 			</div>
 		</div>

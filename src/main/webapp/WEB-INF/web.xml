@@ -4,6 +4,18 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	version="2.5">
 	<display-name>fhirtb</display-name>
+	<!-- Login filter -->
+	<filter>
+		<filter-name>AuthorizationFilter</filter-name>
+		<filter-class>fhirtb.AuthorizationFilter</filter-class>
+	</filter>
+	 <!-- Set the login filter to secure all the pages in the /secured/* path of the application  -->
+	<filter-mapping>
+		<filter-name>AuthorizationFilter</filter-name>
+		<url-pattern>/secured/*</url-pattern>
+	</filter-mapping>
+
+
 	<context-param>
 		<param-name>javax.faces.DEFAULT_SUFFIX</param-name>
 		<param-value>.xhtml</param-value>
@@ -22,19 +34,19 @@
 		<url-pattern>*.jsf</url-pattern>
 	</servlet-mapping>
 	<context-param>
-    <param-name>JDBC-DRIVER</param-name>
-    <param-value>com.mysql.jdbc.Driver</param-value>
-</context-param>
+		<param-name>JDBC-DRIVER</param-name>
+		<param-value>com.mysql.jdbc.Driver</param-value>
+	</context-param>
 	<context-param>
-    <param-name>DB-SERVER</param-name>
-    <param-value>jdbc:mysql://localhost:3306/fhirtb?useSSL=false</param-value>
-</context-param>
-<context-param>
-    <param-name>DB-USER</param-name>
-    <param-value>camille</param-value>
-</context-param>
-<context-param>
-    <param-name>DB-PASSWORD</param-name>
-    <param-value>camille</param-value>
-</context-param>
+		<param-name>DB-SERVER</param-name>
+		<param-value>jdbc:mysql://localhost:3306/fhirtb?useSSL=false</param-value>
+	</context-param>
+	<context-param>
+		<param-name>DB-USER</param-name>
+		<param-value>camille</param-value>
+	</context-param>
+	<context-param>
+		<param-name>DB-PASSWORD</param-name>
+		<param-value>camille</param-value>
+	</context-param>
 </web-app>

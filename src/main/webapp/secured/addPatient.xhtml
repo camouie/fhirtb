@@ -6,21 +6,22 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core">
 
-<head>
-<style type="text/css">
-.aligned {
-	margin-left: 2cm;
-}
-</style>
-</head>
-
 <ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
 	<ui:define name="content">
+		<h:head>
+			<title>login</title>
+			<style type="text/css">
+#containercent {
+	width: 50%;
+	margin: 0 auto;
+}
+</style>
+		</h:head>
 
 		<f:event type="preRenderView" listener="#{patientbean.load()}" />
 
 		<h:form>
-			<div class="aligned">
+			<div id="containercent">
 				<table cellpadding="10">
 					<tr>
 						<td>

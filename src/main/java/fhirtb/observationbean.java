@@ -89,6 +89,23 @@ public class observationbean {
 		}
 
 	}
+	/*
+	 * method called by page welcome only for patient users
+	 */
+	public void welcomeload() throws FHIRException, InterruptedException {
+		// set the current patient's id from the url parameter
+		this.logicalID = (String) SessionUtils.getSession().getAttribute("fhirid");
+
+		System.out.println("------LOAD PATIENT WITH ID " + logicalID);
+
+		if (logicalID != null) {
+			this.getPatientbyID();
+			this.SetBodyWeightResource();
+			this.SetBodyHeightResource();
+			this.setVariablesFromResources();
+		}
+
+	}
 
 	/*
 	 * get the patient resource based on the LogicalID received in http
@@ -176,8 +193,19 @@ public class observationbean {
 		bwhandler.updateVitalResource(this.bodyWeight, this.Obodyweight, "bodyweight");
 		bwhandler.updateVitalResource(this.bodyHeight, this.ObodyHeight, "bodyheight");
 		updatePatient();
-		return "/secured/index?faces-redirect=true";
+		
+		viewNavigation vn = new viewNavigation();
+		return vn.goHome();
 
+	}
+	
+	public String updateVitals(){
+		System.out.println("[[[[[[[[[[[[[[ update vitals called");
+		bwhandler.updateVitalResource(this.bodyWeight, this.Obodyweight, "bodyweight");
+		bwhandler.updateVitalResource(this.bodyHeight, this.ObodyHeight, "bodyheight");
+		
+		viewNavigation vn = new viewNavigation();
+		return vn.goHome();
 	}
 	
 	public void updatePatient() {

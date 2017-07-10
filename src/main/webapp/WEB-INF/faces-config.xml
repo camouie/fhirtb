@@ -24,6 +24,11 @@
 		<managed-bean-class>fhirtb.practitionerbean</managed-bean-class>
 		<managed-bean-scope>view</managed-bean-scope>
 	</managed-bean>
+	<managed-bean>
+		<managed-bean-name>viewNavigation</managed-bean-name>
+		<managed-bean-class>fhirtb.viewNavigation</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
 	
 	<navigation-rule>
 		<from-view-id>/login.xhtml</from-view-id>

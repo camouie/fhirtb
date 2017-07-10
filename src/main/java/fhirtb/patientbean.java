@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpSession;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 public class patientbean {
@@ -31,7 +33,11 @@ public class patientbean {
 	private List<Practitioner> doctors;
 	private String doctorid;
 	private String patientid;
-
+	
+	//session param
+	private String fhirid;
+	HttpSession session;
+	
 	// DB query parameter to add a patient account
 	private String password;
 	private String email;
@@ -39,6 +45,7 @@ public class patientbean {
 	private String serverBaseUrl;
 	private FhirContext ctx;
 	private Fhircontextconnection fco;
+	
 
 	@PostConstruct
 	public void fhircontext() {
@@ -50,6 +57,16 @@ public class patientbean {
 		// initialize the patients list
 		this.patients = new ArrayList<Patient>();
 		this.doctors = new ArrayList<Practitioner>();
+		
+		//get the fhirid form session param
+		this.session = SessionUtils.getSession();
+		this.fhirid = (String) this.session.getAttribute("fhirid");
+		System.out.println(">>>>>>>>>>>>>>>>> fhirid of this user is : " + this.fhirid);
+		
+		if(session.getAttribute("role").equals("doctor")){
+			System.out.println("role = doctor so fill the list");
+			this.getDoctorsPatients(this.fhirid);
+		}
 
 	}
 
@@ -60,12 +77,21 @@ public class patientbean {
 		this.getDoctorsForPatient();
 		this.setDoctor(new Practitioner());
 	}
+	
+	public void getPatientsByLastname(){
+		if(session.getAttribute("role").equals("doctor")){
+			this.getPatientsByLastnameDoctor(this.fhirid);
+		}
+		if(session.getAttribute("role").equals("admin")){
+			this.getPatientsByLastnameAdmin();
+		}
+	}
 
 	/*
 	 * get a bundle of all the patients by a lastname search, lastname stored in
 	 * bean proprety "lastname"
 	 */
-	public void getPatientsByLastname() {
+	public void getPatientsByLastnameAdmin() {
 		// create the RESTful client to work with our FHIR server
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
@@ -74,11 +100,11 @@ public class patientbean {
 			Bundle response = client.search().forResource(Patient.class)
 					.where(Patient.FAMILY.matches().values(this.lastname)).returnBundle(Bundle.class).execute();
 
-			System.out.println("Found " + response.getTotal() + " patients called " + "'" + this.lastname);
+			System.out.println("Found " + response.getTotal() + " patients called " + " : " + this.lastname);
 
 			// initialize the patients list
 			this.patients = new ArrayList<Patient>();
-			System.out.println("j'initialize la liste de patients");
+			System.out.println("Admin / Patients list initialization");
 
 			response.getEntry().forEach((entry) -> {
 				IParser jParser = this.ctx.newJsonParser().setPrettyPrint(true);
@@ -88,7 +114,7 @@ public class patientbean {
 				// populate the list with the retrieved bundle's resources
 				Patient p = (Patient) entry.getResource();
 				this.patients.add(p);
-				System.out.println("----------------" + p.getName().toString());
+				System.out.println("----------------" + p.getNameFirstRep().getFamily());
 			});
 
 		} catch (Exception e) {
@@ -96,6 +122,75 @@ public class patientbean {
 			e.printStackTrace();
 		}
 
+	}
+	
+	public void getPatientsByLastnameDoctor(String doctorID) {
+		// create the RESTful client to work with our FHIR server
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+
+		try {
+			// search for the resource created
+			Bundle response = client.search().forResource(Patient.class)
+					.where(Patient.FAMILY.matches().values(this.lastname))
+					.where(new ReferenceClientParam("general-practitioner").hasId(doctorID))
+					.returnBundle(Bundle.class)
+					.execute();
+
+			System.out.println("Found " + response.getTotal() + " patients called " + " : " + this.lastname);
+
+			// initialize the patients list
+			this.patients = new ArrayList<Patient>();
+			System.out.println("Doctor / Patients list initialization");
+
+			response.getEntry().forEach((entry) -> {
+				IParser jParser = this.ctx.newJsonParser().setPrettyPrint(true);
+				String resourceJSON = jParser.encodeResourceToString(entry.getResource());
+				System.out.println(resourceJSON);
+
+				// populate the list with the retrieved bundle's resources
+				Patient p = (Patient) entry.getResource();
+				this.patients.add(p);
+				System.out.println("----------------" + p.getNameFirstRep().getFamily());
+			});
+
+		} catch (Exception e) {
+			System.out.println("An error occurred trying to search:");
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void getDoctorsPatients(String doctorID){
+		
+		// create the RESTful client to work with our FHIR server
+				IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+
+				try {
+					Bundle response = client.search().forResource(Patient.class)
+							.where(new ReferenceClientParam("general-practitioner").hasId(doctorID))
+							.prettyPrint()
+							.returnBundle(Bundle.class)
+							.execute();
+					
+
+					System.out.println("Found " + response.getTotal() + " patients with doctor id " + ":" + doctorID);
+
+					// initialize the patients list
+					this.patients = new ArrayList<Patient>();
+					System.out.println("Initialize patients list for doctor");
+
+					response.getEntry().forEach((entry) -> {
+						// populate the list with the retrieved bundle's resources
+						Patient p = (Patient) entry.getResource();
+						this.patients.add(p);
+						System.out.println("----------------ADDED PATIENT CALLED : " + p.getNameFirstRep().getFamily());
+					});
+
+				} catch (Exception e) {
+					System.out.println("An error occurred trying to search:");
+					e.printStackTrace();
+				}
+		
 	}
 
 	/*
@@ -306,5 +401,14 @@ public class patientbean {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+
+	public String getFhirid() {
+		return fhirid;
+	}
+
+	public void setFhirid(String fhirid) {
+		this.fhirid = fhirid;
+	}
+	
 
 }

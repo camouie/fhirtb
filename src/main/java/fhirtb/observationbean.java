@@ -176,7 +176,7 @@ public class observationbean {
 		bwhandler.updateVitalResource(this.bodyWeight, this.Obodyweight, "bodyweight");
 		bwhandler.updateVitalResource(this.bodyHeight, this.ObodyHeight, "bodyheight");
 		updatePatient();
-		return "secured/index?faces-redirect=true";
+		return "/secured/index?faces-redirect=true";
 
 	}
 	

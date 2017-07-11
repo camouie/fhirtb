@@ -33,11 +33,11 @@ public class patientbean {
 	private List<Practitioner> doctors;
 	private String doctorid;
 	private String patientid;
-	
-	//session param
+
+	// session param
 	private String fhirid;
 	HttpSession session;
-	
+
 	// DB query parameter to add a patient account
 	private String password;
 	private String email;
@@ -45,7 +45,6 @@ public class patientbean {
 	private String serverBaseUrl;
 	private FhirContext ctx;
 	private Fhircontextconnection fco;
-	
 
 	@PostConstruct
 	public void fhircontext() {
@@ -57,13 +56,14 @@ public class patientbean {
 		// initialize the patients list
 		this.patients = new ArrayList<Patient>();
 		this.doctors = new ArrayList<Practitioner>();
-		
-		//get the fhirid form session param
+
+		// get the fhirid form session param
 		this.session = SessionUtils.getSession();
 		this.fhirid = (String) this.session.getAttribute("fhirid");
 		System.out.println(">>>>>>>>>>>>>>>>> fhirid of this user is : " + this.fhirid);
 		
-		if(session.getAttribute("role").equals("doctor")){
+		//if the user is a doctor, fill directly the patients list with his patients from fhir server
+		if (session.getAttribute("role").equals("doctor")) {
 			System.out.println("role = doctor so fill the list");
 			this.getDoctorsPatients(this.fhirid);
 		}
@@ -78,11 +78,15 @@ public class patientbean {
 		this.setDoctor(new Practitioner());
 	}
 	
-	public void getPatientsByLastname(){
-		if(session.getAttribute("role").equals("doctor")){
+	/*
+	 * the search by lastname when the user is a doctor will only return his assigned patient resources form the server
+	 * admin user can see all the available patient resources
+	 */
+	public void getPatientsByLastname() {
+		if (session.getAttribute("role").equals("doctor")) {
 			this.getPatientsByLastnameDoctor(this.fhirid);
 		}
-		if(session.getAttribute("role").equals("admin")){
+		if (session.getAttribute("role").equals("admin")) {
 			this.getPatientsByLastnameAdmin();
 		}
 	}
@@ -123,7 +127,11 @@ public class patientbean {
 		}
 
 	}
-	
+
+	/*
+	 * get the patients according to their lastnames of a doctor to populate the
+	 * patients list of the bean with the doctor ID as parameter
+	 */
 	public void getPatientsByLastnameDoctor(String doctorID) {
 		// create the RESTful client to work with our FHIR server
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
@@ -132,8 +140,7 @@ public class patientbean {
 			// search for the resource created
 			Bundle response = client.search().forResource(Patient.class)
 					.where(Patient.FAMILY.matches().values(this.lastname))
-					.where(new ReferenceClientParam("general-practitioner").hasId(doctorID))
-					.returnBundle(Bundle.class)
+					.where(new ReferenceClientParam("general-practitioner").hasId(doctorID)).returnBundle(Bundle.class)
 					.execute();
 
 			System.out.println("Found " + response.getTotal() + " patients called " + " : " + this.lastname);
@@ -159,38 +166,38 @@ public class patientbean {
 		}
 
 	}
-	
-	public void getDoctorsPatients(String doctorID){
-		
+
+	/*
+	 * get all the patients of a doctor retrieved by its ID
+	 */
+	public void getDoctorsPatients(String doctorID) {
+
 		// create the RESTful client to work with our FHIR server
-				IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
-				try {
-					Bundle response = client.search().forResource(Patient.class)
-							.where(new ReferenceClientParam("general-practitioner").hasId(doctorID))
-							.prettyPrint()
-							.returnBundle(Bundle.class)
-							.execute();
-					
+		try {
+			Bundle response = client.search().forResource(Patient.class)
+					.where(new ReferenceClientParam("general-practitioner").hasId(doctorID)).prettyPrint()
+					.returnBundle(Bundle.class).execute();
 
-					System.out.println("Found " + response.getTotal() + " patients with doctor id " + ":" + doctorID);
+			System.out.println("Found " + response.getTotal() + " patients with doctor id " + ":" + doctorID);
 
-					// initialize the patients list
-					this.patients = new ArrayList<Patient>();
-					System.out.println("Initialize patients list for doctor");
+			// initialize the patients list
+			this.patients = new ArrayList<Patient>();
+			System.out.println("Initialize patients list for doctor");
 
-					response.getEntry().forEach((entry) -> {
-						// populate the list with the retrieved bundle's resources
-						Patient p = (Patient) entry.getResource();
-						this.patients.add(p);
-						System.out.println("----------------ADDED PATIENT CALLED : " + p.getNameFirstRep().getFamily());
-					});
+			response.getEntry().forEach((entry) -> {
+				// populate the list with the retrieved bundle's resources
+				Patient p = (Patient) entry.getResource();
+				this.patients.add(p);
+				System.out.println("----------------ADDED PATIENT CALLED : " + p.getNameFirstRep().getFamily());
+			});
 
-				} catch (Exception e) {
-					System.out.println("An error occurred trying to search:");
-					e.printStackTrace();
-				}
-		
+		} catch (Exception e) {
+			System.out.println("An error occurred trying to search:");
+			e.printStackTrace();
+		}
+
 	}
 
 	/*
@@ -230,9 +237,11 @@ public class patientbean {
 			IdType id = (IdType) outcome.getId();
 			System.out.println("Resource is available at: " + id.getValue());
 			this.patientid = id.getIdPart();
-			//create the observation now, because of latencies of some test servers
+			// create the observation now, because of latencies of some test
+			// servers
 			this.createOBSforPatient();
-			//create an account for the patient in the DB so he can login later on
+			// create an account for the patient in the DB so he can login later
+			// on
 			this.createPatientAccount();
 
 		} catch (DataFormatException e) {
@@ -242,6 +251,9 @@ public class patientbean {
 
 	}
 
+	/*
+	 * retrieve the list of all doctor resources from id stored in DB
+	 */
 	public void getDoctorsForPatient() throws ClassNotFoundException {
 		// create the RESTful client to work with our FHIR server
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
@@ -271,7 +283,9 @@ public class patientbean {
 		}
 
 	}
-
+	/*
+	 * retrieve a Doctor resource given its ID
+	 */
 	public void getSelectedDoctorbyID() {
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 		try {
@@ -291,7 +305,9 @@ public class patientbean {
 			e.printStackTrace();
 		}
 	}
-
+	/*
+	 * create the observation resources needed for the patient in the application
+	 */
 	public void createOBSforPatient() {
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
@@ -409,6 +425,5 @@ public class patientbean {
 	public void setFhirid(String fhirid) {
 		this.fhirid = fhirid;
 	}
-	
 
 }

@@ -320,6 +320,7 @@ public class patientbean {
 			VitalSignsHandler vh = new VitalSignsHandler();
 			vh.CreateVitalResource(this.patient, 0.0, "bodyweight");
 			vh.CreateVitalResource(this.patient, 0.0, "bodyheight");
+			vh.CreateVitalResource(this.patient, 0.0 , "heartrate");
 
 		} catch (Exception e) {
 			System.out.println("An error occurred trying to search:");

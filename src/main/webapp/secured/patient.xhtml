@@ -104,6 +104,16 @@
 							</h:inputText></td>
 					</tr>
 					<tr>
+						<td><h:outputLabel for="heartrate">Heart Rate (/min - #.#)<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="heartrate"
+								value="#{observationbean.heartrate}" size="20" maxlength="60"
+								styleClass="form-control">
+								<f:convertNumber pattern="#0.0" />
+							</h:inputText></td>
+					</tr>
+					<tr>
 						<td><h:commandButton value="Save"
 								action="#{observationbean.updateAllObs()}"
 								styleClass="btn btn-default" /></td>

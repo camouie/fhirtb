@@ -30,10 +30,13 @@ public class observationbean {
 	private String serverBaseUrl;
 	private FhirContext ctx;
 	private VitalSignsHandler bwhandler;
+	
 	//object for the resources in the bean
 	private Patient patient;
 	private Observation Obodyweight;
 	private Observation ObodyHeight;
+	private Observation Oheartrate;
+	
 	//page inputs
 	private String lastname;
 	private String firstname;
@@ -41,10 +44,12 @@ public class observationbean {
 	private String prefix;
 	private Double bodyWeight;
 	private Double bodyHeight;
+	private Double heartrate;
 	
-	//resources ID (when not saving the whole resource)
+	//resources ID (when not saving the whole resource in the bean)
 	private String bodyweightID;
 	private String bodyheightID;
+	private String heartrateID;
 
 	@PostConstruct
 	public void fhircontext() {
@@ -55,11 +60,17 @@ public class observationbean {
 		this.setPatient(new Patient());
 		this.setObodyweight(new Observation());
 		this.setObodyHeight(new Observation());
+		this.setOheartrate(new Observation());
+		
 		//default values
 		this.setBodyWeight(0.0);
 		this.setBodyHeight(0.0);
+		this.setHeartrate(0.0);
+		
 		System.out.println("at construct, bodyweight = " + bodyWeight);
 		System.out.println("at construct, bodyheight = " + bodyHeight);
+		System.out.println("at construct, Heart rate = " + heartrate);
+		//Instantiate handler class for the vital sign resources interactions
 		this.bwhandler = new VitalSignsHandler();
 
 	}
@@ -80,13 +91,7 @@ public class observationbean {
 
 		System.out.println("------LOAD PATIENT WITH ID " + logicalID);
 
-		if (logicalID != null) {
-			this.getPatientbyID();
-			this.SetBodyWeightResource();
-			this.SetBodyHeightResource();
-			this.setVariablesFromResources();
-
-		}
+		this.loading();
 
 	}
 	/*
@@ -97,14 +102,23 @@ public class observationbean {
 		this.logicalID = (String) SessionUtils.getSession().getAttribute("fhirid");
 
 		System.out.println("------LOAD PATIENT WITH ID " + logicalID);
+		
+		this.loading();
+		
 
+	}
+	
+	public void loading() throws FHIRException{
 		if (logicalID != null) {
+			//get the patient from the server with its id in order to update the patient on save button
 			this.getPatientbyID();
+			//get the existing vital sign resources from server or create ones if none existing
 			this.SetBodyWeightResource();
 			this.SetBodyHeightResource();
+			this.SetHeartRateResource();
+			//set the bean variable now the resources are created or found on server
 			this.setVariablesFromResources();
 		}
-
 	}
 
 	/*
@@ -167,6 +181,24 @@ public class observationbean {
 		}
 		
 	}
+	
+	public void SetHeartRateResource() throws FHIRException{
+		this.FhirCo();
+		System.out.println("SetHeartRate method called");
+		String code = "heartrate";
+		
+		//get the patient's heartrate
+		this.setOheartrate(bwhandler.getPatientVital(this.patient, code));
+		
+		//if the heart rate resource gotten is empty means we need to create one for the patient
+		if (this.Oheartrate.isEmpty()) {
+			this.heartrateID = bwhandler.CreateVitalResource(this.patient, this.heartrate, code);
+			// ask for the resource on the server and set the bean property with
+			// it
+			this.setOheartrate(bwhandler.getPatientVitalsbyID(this.heartrateID));
+		}
+		
+	}
 
 	/*
 	 * Setting the bean properties with the existing values of the resources
@@ -182,6 +214,10 @@ public class observationbean {
 			this.bodyHeight = this.ObodyHeight.getValueQuantity().getValueElement().getValueAsNumber()
 					.doubleValue();
 		} 
+		if (this.Oheartrate.hasValueQuantity()) {
+			this.heartrate = this.Oheartrate.getValueQuantity().getValueElement().getValueAsNumber()
+					.doubleValue();
+		} 
 
 	}
 
@@ -192,6 +228,9 @@ public class observationbean {
 	public String updateAllObs() {
 		bwhandler.updateVitalResource(this.bodyWeight, this.Obodyweight, "bodyweight");
 		bwhandler.updateVitalResource(this.bodyHeight, this.ObodyHeight, "bodyheight");
+		bwhandler.updateVitalResource(this.heartrate, this.Oheartrate, "heartrate");
+		
+		//update the changes made to patient infos in inputs
 		updatePatient();
 		
 		viewNavigation vn = new viewNavigation();
@@ -203,6 +242,8 @@ public class observationbean {
 		System.out.println("[[[[[[[[[[[[[[ update vitals called");
 		bwhandler.updateVitalResource(this.bodyWeight, this.Obodyweight, "bodyweight");
 		bwhandler.updateVitalResource(this.bodyHeight, this.ObodyHeight, "bodyheight");
+		bwhandler.updateVitalResource(this.heartrate, this.Oheartrate, "heartrate");
+		
 		
 		viewNavigation vn = new viewNavigation();
 		return vn.goHome();
@@ -346,6 +387,25 @@ public class observationbean {
 	public void setBodyHeight(Double bodyHeight) {
 		this.bodyHeight = bodyHeight;
 	}
+	public Observation getOheartrate() {
+		return Oheartrate;
+	}
+	public void setOheartrate(Observation oheartrate) {
+		Oheartrate = oheartrate;
+	}
+	public Double getHeartrate() {
+		return heartrate;
+	}
+	public void setHeartrate(Double heartrate) {
+		this.heartrate = heartrate;
+	}
+	public String getHeartrateID() {
+		return heartrateID;
+	}
+	public void setHeartrateID(String heartrateID) {
+		this.heartrateID = heartrateID;
+	}
+	
 	
 	
 	

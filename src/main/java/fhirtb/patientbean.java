@@ -205,7 +205,7 @@ public class patientbean {
 	 * firstname, the lastname and the prefix the birthdate is taken from the
 	 * bean proprety
 	 */
-	public void addPatient(String firstname, String lastname, String prefix) throws ClassNotFoundException {
+	public String addPatient(String firstname, String lastname, String prefix) throws ClassNotFoundException {
 
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
@@ -248,6 +248,9 @@ public class patientbean {
 			System.out.println("An error occurred trying to upload:");
 			e.printStackTrace();
 		}
+		
+		viewNavigation vn = new viewNavigation();
+		return vn.goHome();
 
 	}
 

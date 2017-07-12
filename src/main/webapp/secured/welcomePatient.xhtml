@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
+	<ui:define name="content">
+
+		<h:head>
+			<title>Welcome</title>
+			<style type="text/css">
+#containercent {
+	width: 60%;
+	margin: 0 auto;
+}
+
+th, td {
+	padding-left: 40px;
+	padding-right: 40px;
+	padding-bottom: 10px;
+	text-align: center;
+}
+
+#tablec {
+	text-align: center;
+	vertical-align: middle;
+}
+
+#j_idt28:weight {
+	width: 80px;
+}
+
+#j_idt28:height {
+	width: 80px;
+}
+
+#j_idt28:heartrate {
+	width: 80px;
+}
+input{
+margin: 0 auto;}
+
+.tdTitle {
+	font-size: x-large;
+	color: #6EC2CB;
+}
+
+input.btn.btn-primary{
+background-color: #6EC2CB;
+border-color: #6EC2CB}
+</style>
+		</h:head>
+
+		<f:event type="preRenderView"
+			listener="#{observationbean.welcomeload}" />
+
+		<h2>
+			Welcome&nbsp;
+			<h:outputText value="#{observationbean.firstname}">
+			</h:outputText>
+			&nbsp;
+
+			<h:outputText value="#{observationbean.lastname}">
+			</h:outputText> !
+		</h2>
+		<h4>Please update your vital signs</h4>
+		<br/>
+		<div id="containercent">
+			<h:form>
+				<table id="tablec">
+					<thead>
+						<tr>
+							<td class="tdTitle">Height</td>
+							<td class="tdTitle">Weight</td>
+
+							<td class="tdTitle">Heart Rate</td>
+
+						</tr>
+					</thead>
+					<tr>
+						<td><h:graphicImage value="../resources/images/ruler2.png"
+								width="80" height="80" id="icon" /></td>
+						<td><h:graphicImage value="../resources/images/scale2.png"
+								width="80" height="80" /></td>
+
+						<td><h:graphicImage
+								value="../resources/images/heartrate2.png" width="80"
+								height="80" /></td>
+					</tr>
+					<tr>
+						<td><h:inputText id="height"
+								value="#{observationbean.bodyHeight}" size="20" maxlength="20"
+								styleClass="form-control" style="width:80px">
+								<f:convertNumber pattern="#0.0" />
+							</h:inputText></td>
+
+						<td><h:inputText id="weight"
+								value="#{observationbean.bodyWeight}" size="20" maxlength="20"
+								styleClass="form-control" style="width:80px">
+								<f:convertNumber pattern="#0.0" />
+							</h:inputText></td>
+
+						<td ><h:inputText id="heartrate"
+								value="#{observationbean.heartrate}" size="20" maxlength="20"
+								styleClass="form-control" style="width:80px">
+								<f:convertNumber pattern="#0.0" />
+							</h:inputText></td>
+
+					</tr>
+					<tr>
+						<td style="height: 25px"></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td align="center" colspan="3"><h:commandButton
+								value="Update" action="#{observationbean.updateVitals()}"
+								styleClass="btn btn-primary" /></td>
+					</tr>
+
+
+				</table>
+			</h:form>
+
+
+		</div>
+	</ui:define>
+</ui:composition>
+</html>

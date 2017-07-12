@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
+	<ui:define name="content">
+
+		<h:head>
+			<title>login</title>
+			<style type="text/css">
+#containercent {
+	width: 50%;
+	margin: 0 auto;
+}
+</style>
+		</h:head>
+
+		<h:form>
+			<div id="containercent">
+				<table cellpadding="10">
+					<tr>
+						<td>
+							<h3>Register a Practitioner</h3>
+						</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="firstname">Firstname<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="firstname"
+								value="#{practitionerbean.firstname}" required="true" size="20"
+								maxlength="60" styleClass="form-control" /></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="lastname">Lastname<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="lastname"
+								value="#{practitionerbean.lastname}" required="true" size="20"
+								maxlength="60" styleClass="form-control" /></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="password">Password<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="password"
+								value="#{practitionerbean.password}" required="true" size="20"
+								maxlength="60" styleClass="form-control" /></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="prefix">Prefix<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="prefix"
+								value="#{practitionerbean.prefix}" required="true" size="20"
+								maxlength="60" styleClass="form-control" /></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td><h:outputLabel for="lastname">Birthdate<span
+									class="requis">* (yyyy-MM-dd)</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText
+								value="#{practitionerbean.birthdate}" required="true" size="20"
+								maxlength="60" styleClass="form-control">
+								<f:convertDateTime pattern="yyyy-MM-dd" />
+							</h:inputText></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="gender">Gender<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="gender"
+								value="#{practitionerbean.gender}" required="true" size="1"
+								maxlength="1" styleClass="form-control" /></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="email">Email<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="email"
+								value="#{practitionerbean.email}" required="true" size="20"
+								maxlength="60" styleClass="form-control" /></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><h:outputLabel for="telephone">Telephone<span
+									class="requis">*</span>
+							</h:outputLabel></td>
+						<td width="250px"><h:inputText id="Telephone"
+								value="#{practitionerbean.telephone}" required="true" size="20"
+								maxlength="60" styleClass="form-control" /></td>
+					</tr>
+					<tr>
+						<td height="10px"></td>
+						<td></td>
+					</tr>
+
+					<tr>
+						<td></td>
+						<td><h:commandButton value="Register"
+								action="#{practitionerbean.addPractitioner()}"
+								styleClass="btn btn-default" /></td>
+					</tr>
+				</table>
+			</div>
+
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

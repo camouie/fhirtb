@@ -48,6 +48,7 @@ public class patientbean {
 
 	@PostConstruct
 	public void fhircontext() {
+		System.out.println("<<<<<<<< PATIENT BEAN REPORTING FOR DUTY >>>>>>>>>");
 
 		this.fco = new Fhircontextconnection();
 		this.serverBaseUrl = fco.getServerBaseUrl();
@@ -66,7 +67,11 @@ public class patientbean {
 		// patients from fhir server
 		if (session.getAttribute("role").equals("doctor")) {
 			System.out.println("role = doctor so fill the list");
-			this.getDoctorsPatients(this.fhirid);
+			//IF using a fhir server implementing the reference to practitioner from patient resource use the following line
+			this.getDoctorsPatients(this.fhirid); 
+			//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			//else use the following
+			//this.getPatientsForDoctorHAPI(this.fhirid);
 		}
 
 	}
@@ -75,7 +80,7 @@ public class patientbean {
 	 * called by prerenderview method on page addpatient
 	 */
 	public void load() throws ClassNotFoundException {
-		this.getDoctorsForPatient();
+		getDoctorsForPatient();
 		this.setDoctor(new Practitioner());
 	}
 
@@ -170,6 +175,81 @@ public class patientbean {
 	}
 
 	/*
+	 * retrieve the list of all doctor resources from id stored in DB
+	 */
+	public void getDoctorsForPatient() throws ClassNotFoundException {
+		// create the RESTful client to work with our FHIR server
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		ArrayList<String> doctorsid = new ArrayList<String>();
+		doctorsid = DAO.getPractitioners();
+
+		for (String doctorid : doctorsid) {
+			try {
+				Bundle response = client.search().forResource(Practitioner.class)
+						.where(new TokenClientParam("_id").exactly().code(doctorid)).prettyPrint()
+						.returnBundle(Bundle.class).execute();
+
+				System.out.println("Found " + response.getTotal() + " doctor with ID " + doctorid);
+
+				if (response.getEntry().size() != 0) {
+					Practitioner p = (Practitioner) response.getEntry().get(0).getResource();
+					System.out.println("adding doctor from server to bean list with lastname = "
+							+ p.getNameFirstRep().getFamily());
+
+					this.doctors.add(p);
+				}
+
+			} catch (Exception e) {
+				System.out.println("An error occurred trying to search:");
+				e.printStackTrace();
+			}
+		}
+
+}
+	/*
+	 * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	 * Method to retrieve all patient resources of a doctor based on all their ids stored in DB
+	 * 
+	 * >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	 */
+	public void getPatientsForDoctorHAPI(String idfhir){
+		// create the RESTful client to work with our FHIR server
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		ArrayList<String> patientsid = new ArrayList<String>();
+		try {
+			patientsid = DAO.getPatientsforPractitioner(idfhir);
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		for (String patientid : patientsid) {
+			try {
+				Bundle response = client.search().forResource(Patient.class)
+						.where(new TokenClientParam("_id").exactly().code(patientid)).prettyPrint()
+						.returnBundle(Bundle.class).execute();
+
+				System.out.println("Found " + response.getTotal() + " patients with ID doctor = " + doctorid);
+				
+				// initialize the patients list
+				this.patients = new ArrayList<Patient>();
+				System.out.println("Initialize patients list for doctor // DB");
+				
+				response.getEntry().forEach((entry) -> {
+					// populate the list with the retrieved bundle's resources
+					Patient p = (Patient) entry.getResource();
+					this.patients.add(p);
+					System.out.println("----------------ADDED PATIENT CALLED : " + p.getNameFirstRep().getFamily());
+				});
+
+			} catch (Exception e) {
+				System.out.println("An error occurred trying to search:");
+				e.printStackTrace();
+			}
+		}
+
+	}
+	/*
 	 * get all the patients of a doctor retrieved by its ID
 	 */
 	public void getDoctorsPatients(String doctorID) {
@@ -202,6 +282,7 @@ public class patientbean {
 
 	}
 
+
 	/*
 	 * add a patient resource onto the server taking as parameters the
 	 * firstname, the lastname and the prefix the birthdate is taken from the
@@ -222,14 +303,14 @@ public class patientbean {
 
 		// get the selected doctor on the page from the fhir server
 		/*
-		 * /!\ general practitioner attribute does not exist on the SPARK SERVER
+		 * /!\ general practitioner attribute does not exist on most FHIR server implementations
 		 */
 		this.getSelectedDoctorbyID();
 		this.patient.addGeneralPractitioner();
 		List<Reference> ref = new ArrayList<Reference>();
 		ref.add(new Reference(this.doctor));
 		this.patient.setGeneralPractitioner(ref);
-
+		
 		System.out.println("doctor added has name : " + this.doctor.getNameFirstRep().getFamily());
 		System.out.println("DOCTOR SET FOR PATIENT");
 
@@ -256,38 +337,7 @@ public class patientbean {
 
 	}
 
-	/*
-	 * retrieve the list of all doctor resources from id stored in DB
-	 */
-	public void getDoctorsForPatient() throws ClassNotFoundException {
-		// create the RESTful client to work with our FHIR server
-		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
-		ArrayList<String> doctorsid = new ArrayList<String>();
-		doctorsid = DAO.getPractitioners();
 
-		for (String doctorid : doctorsid) {
-			try {
-				Bundle response = client.search().forResource(Practitioner.class)
-						.where(new TokenClientParam("_id").exactly().code(doctorid)).prettyPrint()
-						.returnBundle(Bundle.class).execute();
-
-				System.out.println("Found " + response.getTotal() + " doctor with ID " + doctorid);
-
-				if (response.getEntry().size() != 0) {
-					Practitioner p = (Practitioner) response.getEntry().get(0).getResource();
-					System.out.println("adding doctor from server to bean list with lastname = "
-							+ p.getNameFirstRep().getFamily());
-
-					this.doctors.add(p);
-				}
-
-			} catch (Exception e) {
-				System.out.println("An error occurred trying to search:");
-				e.printStackTrace();
-			}
-		}
-
-	}
 
 	/*
 	 * retrieve a Doctor resource given its ID

@@ -258,7 +258,7 @@ public class observationbean {
 		viewNavigation vn = new viewNavigation();
 		return vn.goHome();
 	}
-
+	
 	public void updatePatient() {
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 

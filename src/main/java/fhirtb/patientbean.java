@@ -61,8 +61,9 @@ public class patientbean {
 		this.session = SessionUtils.getSession();
 		this.fhirid = (String) this.session.getAttribute("fhirid");
 		System.out.println(">>>>>>>>>>>>>>>>> fhirid of this user is : " + this.fhirid);
-		
-		//if the user is a doctor, fill directly the patients list with his patients from fhir server
+
+		// if the user is a doctor, fill directly the patients list with his
+		// patients from fhir server
 		if (session.getAttribute("role").equals("doctor")) {
 			System.out.println("role = doctor so fill the list");
 			this.getDoctorsPatients(this.fhirid);
@@ -77,10 +78,11 @@ public class patientbean {
 		this.getDoctorsForPatient();
 		this.setDoctor(new Practitioner());
 	}
-	
+
 	/*
-	 * the search by lastname when the user is a doctor will only return his assigned patient resources form the server
-	 * admin user can see all the available patient resources
+	 * the search by lastname when the user is a doctor will only return his
+	 * assigned patient resources form the server admin user can see all the
+	 * available patient resources
 	 */
 	public void getPatientsByLastname() {
 		if (session.getAttribute("role").equals("doctor")) {
@@ -248,7 +250,7 @@ public class patientbean {
 			System.out.println("An error occurred trying to upload:");
 			e.printStackTrace();
 		}
-		
+
 		viewNavigation vn = new viewNavigation();
 		return vn.goHome();
 
@@ -286,6 +288,7 @@ public class patientbean {
 		}
 
 	}
+
 	/*
 	 * retrieve a Doctor resource given its ID
 	 */
@@ -308,8 +311,10 @@ public class patientbean {
 			e.printStackTrace();
 		}
 	}
+
 	/*
-	 * create the observation resources needed for the patient in the application
+	 * create the observation resources needed for the patient in the
+	 * application
 	 */
 	public void createOBSforPatient() {
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
@@ -323,7 +328,7 @@ public class patientbean {
 			VitalSignsHandler vh = new VitalSignsHandler();
 			vh.CreateVitalResource(this.patient, 0.0, "bodyweight");
 			vh.CreateVitalResource(this.patient, 0.0, "bodyheight");
-			vh.CreateVitalResource(this.patient, 0.0 , "heartrate");
+			vh.CreateVitalResource(this.patient, 0.0, "heartrate");
 
 		} catch (Exception e) {
 			System.out.println("An error occurred trying to search:");

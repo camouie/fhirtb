@@ -23,21 +23,21 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 public class observationbean {
-	//HTTP parameter
+	// HTTP parameter
 	private String logicalID;
-	//references and FHIR connection
+	// references and FHIR connection
 	private Fhircontextconnection fco;
 	private String serverBaseUrl;
 	private FhirContext ctx;
 	private VitalSignsHandler bwhandler;
-	
-	//object for the resources in the bean
+
+	// object for the resources in the bean
 	private Patient patient;
 	private Observation Obodyweight;
 	private Observation ObodyHeight;
 	private Observation Oheartrate;
-	
-	//page inputs
+
+	// page inputs
 	private String lastname;
 	private String firstname;
 	private Date birthdate;
@@ -45,8 +45,8 @@ public class observationbean {
 	private Double bodyWeight;
 	private Double bodyHeight;
 	private Double heartrate;
-	
-	//resources ID (when not saving the whole resource in the bean)
+
+	// resources ID (when not saving the whole resource in the bean)
 	private String bodyweightID;
 	private String bodyheightID;
 	private String heartrateID;
@@ -54,27 +54,28 @@ public class observationbean {
 	@PostConstruct
 	public void fhircontext() {
 		System.out.println("observation bean reporting for duty");
-		
+
 		this.FhirCo();
-		//initialize objects
+		// initialize objects
 		this.setPatient(new Patient());
 		this.setObodyweight(new Observation());
 		this.setObodyHeight(new Observation());
 		this.setOheartrate(new Observation());
-		
-		//default values
+
+		// default values
 		this.setBodyWeight(0.0);
 		this.setBodyHeight(0.0);
 		this.setHeartrate(0.0);
-		
+
 		System.out.println("at construct, bodyweight = " + bodyWeight);
 		System.out.println("at construct, bodyheight = " + bodyHeight);
 		System.out.println("at construct, Heart rate = " + heartrate);
-		//Instantiate handler class for the vital sign resources interactions
+		// Instantiate handler class for the vital sign resources interactions
 		this.bwhandler = new VitalSignsHandler();
 
 	}
-	public void FhirCo(){
+
+	public void FhirCo() {
 		this.fco = new Fhircontextconnection();
 		this.serverBaseUrl = fco.getServerBaseUrl();
 		this.ctx = fco.getCtx();
@@ -86,13 +87,13 @@ public class observationbean {
 	 */
 	public void load() throws FHIRException, InterruptedException {
 		String role = (String) SessionUtils.getSession().getAttribute("role");
-		if(!role.equals("patient")){
-		// set the current patient's id from the url parameter for admin and doctors
-		this.logicalID = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
-				.get("logicalid");
-		
-		}
-		else{
+		if (!role.equals("patient")) {
+			// set the current patient's id from the url parameter for admin and
+			// doctors
+			this.logicalID = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
+					.get("logicalid");
+
+		} else {
 			this.logicalID = (String) SessionUtils.getSession().getAttribute("fhirid");
 		}
 
@@ -101,6 +102,7 @@ public class observationbean {
 		this.loading();
 
 	}
+
 	/*
 	 * method called by page welcome only for patient users
 	 */
@@ -109,21 +111,23 @@ public class observationbean {
 		this.logicalID = (String) SessionUtils.getSession().getAttribute("fhirid");
 
 		System.out.println("------LOAD PATIENT WITH ID " + logicalID);
-		
+
 		this.loading();
-		
 
 	}
-	
-	public void loading() throws FHIRException{
+
+	public void loading() throws FHIRException {
 		if (logicalID != null) {
-			//get the patient from the server with its id in order to update the patient on save button
+			// get the patient from the server with its id in order to update
+			// the patient on save button
 			this.getPatientbyID();
-			//get the existing vital sign resources from server or create ones if none existing
+			// get the existing vital sign resources from server or create ones
+			// if none existing
 			this.SetBodyWeightResource();
 			this.SetBodyHeightResource();
 			this.SetHeartRateResource();
-			//set the bean variable now the resources are created or found on server
+			// set the bean variable now the resources are created or found on
+			// server
 			this.setVariablesFromResources();
 		}
 	}
@@ -161,9 +165,10 @@ public class observationbean {
 		System.out.println("SetBodyWeight method called");
 		this.FhirCo();
 		String code = "bodyweight";
-		//get the patient's bodyweight
+		// get the patient's bodyweight
 		this.setObodyweight(bwhandler.getPatientVital(this.patient, code));
-		//if the bodyweight resource gotten is empty means we need to create one for the patient
+		// if the bodyweight resource gotten is empty means we need to create
+		// one for the patient
 		if (this.Obodyweight.isEmpty()) {
 			this.bodyweightID = bwhandler.CreateVitalResource(this.patient, this.bodyWeight, code);
 			// ask for the resource on the server and set the bean property with
@@ -172,39 +177,41 @@ public class observationbean {
 		}
 
 	}
-	
-	public void SetBodyHeightResource() throws FHIRException{
+
+	public void SetBodyHeightResource() throws FHIRException {
 		this.FhirCo();
 		System.out.println("SetBodyHeight method called");
 		String code = "bodyheight";
-		//get the patient's bodyweight
+		// get the patient's bodyweight
 		this.setObodyHeight(bwhandler.getPatientVital(this.patient, code));
-		//if the bodyweight resource gotten is empty means we need to create one for the patient
+		// if the bodyweight resource gotten is empty means we need to create
+		// one for the patient
 		if (this.ObodyHeight.isEmpty()) {
 			this.bodyheightID = bwhandler.CreateVitalResource(this.patient, this.bodyHeight, code);
 			// ask for the resource on the server and set the bean property with
 			// it
 			this.setObodyHeight(bwhandler.getPatientVitalsbyID(this.bodyheightID));
 		}
-		
+
 	}
-	
-	public void SetHeartRateResource() throws FHIRException{
+
+	public void SetHeartRateResource() throws FHIRException {
 		this.FhirCo();
 		System.out.println("SetHeartRate method called");
 		String code = "heartrate";
-		
-		//get the patient's heartrate
+
+		// get the patient's heartrate
 		this.setOheartrate(bwhandler.getPatientVital(this.patient, code));
-		
-		//if the heart rate resource gotten is empty means we need to create one for the patient
+
+		// if the heart rate resource gotten is empty means we need to create
+		// one for the patient
 		if (this.Oheartrate.isEmpty()) {
 			this.heartrateID = bwhandler.CreateVitalResource(this.patient, this.heartrate, code);
 			// ask for the resource on the server and set the bean property with
 			// it
 			this.setOheartrate(bwhandler.getPatientVitalsbyID(this.heartrateID));
 		}
-		
+
 	}
 
 	/*
@@ -214,17 +221,14 @@ public class observationbean {
 	public void setVariablesFromResources() throws FHIRException {
 		// if none have been set yet, default value will be 0.0
 		if (this.Obodyweight.hasValueQuantity()) {
-				this.bodyWeight = this.Obodyweight.getValueQuantity().getValueElement().getValueAsNumber()
-						.doubleValue();
-			} 
+			this.bodyWeight = this.Obodyweight.getValueQuantity().getValueElement().getValueAsNumber().doubleValue();
+		}
 		if (this.ObodyHeight.hasValueQuantity()) {
-			this.bodyHeight = this.ObodyHeight.getValueQuantity().getValueElement().getValueAsNumber()
-					.doubleValue();
-		} 
+			this.bodyHeight = this.ObodyHeight.getValueQuantity().getValueElement().getValueAsNumber().doubleValue();
+		}
 		if (this.Oheartrate.hasValueQuantity()) {
-			this.heartrate = this.Oheartrate.getValueQuantity().getValueElement().getValueAsNumber()
-					.doubleValue();
-		} 
+			this.heartrate = this.Oheartrate.getValueQuantity().getValueElement().getValueAsNumber().doubleValue();
+		}
 
 	}
 
@@ -236,26 +240,25 @@ public class observationbean {
 		bwhandler.updateVitalResource(this.bodyWeight, this.Obodyweight, "bodyweight");
 		bwhandler.updateVitalResource(this.bodyHeight, this.ObodyHeight, "bodyheight");
 		bwhandler.updateVitalResource(this.heartrate, this.Oheartrate, "heartrate");
-		
-		//update the changes made to patient infos in inputs
+
+		// update the changes made to patient infos in inputs
 		updatePatient();
-		
+
 		viewNavigation vn = new viewNavigation();
 		return vn.goHome();
 
 	}
-	
-	public String updateVitals(){
+
+	public String updateVitals() {
 		System.out.println("[[[[[[[[[[[[[[ update vitals called");
 		bwhandler.updateVitalResource(this.bodyWeight, this.Obodyweight, "bodyweight");
 		bwhandler.updateVitalResource(this.bodyHeight, this.ObodyHeight, "bodyheight");
 		bwhandler.updateVitalResource(this.heartrate, this.Oheartrate, "heartrate");
-		
-		
+
 		viewNavigation vn = new viewNavigation();
 		return vn.goHome();
 	}
-	
+
 	public void updatePatient() {
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
@@ -291,12 +294,11 @@ public class observationbean {
 		}
 
 	}
-	
-	
+
 	/*
 	 * Getters and setters methods for the bean properties
 	 */
-	
+
 	public String getLogicalID() {
 		return logicalID;
 	}
@@ -376,45 +378,53 @@ public class observationbean {
 	public void setBodyweightID(String bodyweightID) {
 		this.bodyweightID = bodyweightID;
 	}
+
 	public Observation getObodyHeight() {
 		return ObodyHeight;
 	}
+
 	public void setObodyHeight(Observation obodyHeight) {
 		ObodyHeight = obodyHeight;
 	}
+
 	public String getBodyheightID() {
 		return bodyheightID;
 	}
+
 	public void setBodyheightID(String bodyheightID) {
 		this.bodyheightID = bodyheightID;
 	}
+
 	public Double getBodyHeight() {
 		return bodyHeight;
 	}
+
 	public void setBodyHeight(Double bodyHeight) {
 		this.bodyHeight = bodyHeight;
 	}
+
 	public Observation getOheartrate() {
 		return Oheartrate;
 	}
+
 	public void setOheartrate(Observation oheartrate) {
 		Oheartrate = oheartrate;
 	}
+
 	public Double getHeartrate() {
 		return heartrate;
 	}
+
 	public void setHeartrate(Double heartrate) {
 		this.heartrate = heartrate;
 	}
+
 	public String getHeartrateID() {
 		return heartrateID;
 	}
+
 	public void setHeartrateID(String heartrateID) {
 		this.heartrateID = heartrateID;
 	}
-	
-	
-	
-	
 
 }

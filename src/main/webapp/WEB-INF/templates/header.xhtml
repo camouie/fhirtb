@@ -31,6 +31,8 @@
 								action="#{viewNavigation.goHome}" /></li>
 						<li><h:link value="Register Patient" outcome="addPatient"
 								rendered="#{loginbean.admin}" /></li>
+						<li><h:link value="My info" outcome="patient"
+								rendered="#{loginbean.patient}" /></li>
 						<li><h:link value="Register Doctor" outcome="addPractitioner"
 								rendered="#{loginbean.admin}" /></li>
 						<li><h:commandLink value="logout"

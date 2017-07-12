@@ -85,9 +85,16 @@ public class observationbean {
 	 * resources before rendering the page "patient"
 	 */
 	public void load() throws FHIRException, InterruptedException {
-		// set the current patient's id from the url parameter
+		String role = (String) SessionUtils.getSession().getAttribute("role");
+		if(!role.equals("patient")){
+		// set the current patient's id from the url parameter for admin and doctors
 		this.logicalID = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 				.get("logicalid");
+		
+		}
+		else{
+			this.logicalID = (String) SessionUtils.getSession().getAttribute("fhirid");
+		}
 
 		System.out.println("------LOAD PATIENT WITH ID " + logicalID);
 

@@ -14,8 +14,6 @@
 		<filter-name>AuthorizationFilter</filter-name>
 		<url-pattern>/secured/*</url-pattern>
 	</filter-mapping>
-
-
 	<context-param>
 		<param-name>javax.faces.DEFAULT_SUFFIX</param-name>
 		<param-value>.xhtml</param-value>

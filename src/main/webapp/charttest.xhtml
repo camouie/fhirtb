@@ -1,0 +1,19 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
+	<ui:define name="content">
+	<p:fieldset legend="linechart">
+	<p:chart type="line" model="#{chartView.lineModel1}" style="height:300px;"/>
+ 
+<p:chart type="line" model="#{chartView.lineModel2}" style="height:300px;"/>
+</p:fieldset>
+	</ui:define>
+</ui:composition>
+</html>

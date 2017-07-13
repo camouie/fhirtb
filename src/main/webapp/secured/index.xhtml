@@ -17,8 +17,8 @@
 
 <ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
 	<ui:define name="content">
-	
-	
+
+
 		<h2>Patients</h2>
 		<h:form>
 			<div class="col-xs-3">
@@ -57,11 +57,16 @@
 									<f:convertDateTime pattern="dd.MM.yyyy" />
 								</h:outputText></td>
 
-							<td class="text-center"><h:link value="Edit"
+							<td class="text-center">
+							<h:link value="Edit"
 									outcome="patient" class='btn btn-info btn-xs'>
 									<f:param name="logicalid" value="#{putid.value}"></f:param>
-								</h:link> <a href="#" class="btn btn-danger btn-xs"><span
-									class="glyphicon glyphicon-remove"></span> Del</a></td>
+
+								</h:link>
+									
+						<h:commandLink value="Delete"
+								action="#{patientbean.delete(putid.value)}" rendered="#{loginbean.admin}" styleClass="btn btn-danger btn-xs"/>			
+							</td>
 
 
 						</tr>

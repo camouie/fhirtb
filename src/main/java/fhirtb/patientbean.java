@@ -11,11 +11,14 @@ import javax.servlet.http.HttpSession;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -392,6 +395,29 @@ public class patientbean {
 	public void createPatientAccount() throws ClassNotFoundException {
 		DAO dao = new DAO();
 		dao.addPatientAccount(this.email, this.password, this.patientid, this.doctorid);
+	}
+	
+	public String delete(String fhirid){
+		//first delete all observation referencing our patient
+		VitalSignsHandler vh = new VitalSignsHandler();
+		vh.deleteobs(fhirid);
+		
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		
+		client.delete().resourceById(new IdDt("Patient", fhirid)).execute();
+		
+		
+		DAO dao = new DAO();
+		try {
+			dao.deletepatient(fhirid);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		viewNavigation vn = new viewNavigation();
+		return vn.goHome();
+		
 	}
 
 	/*

@@ -11,9 +11,11 @@ import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.exceptions.FHIRException;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 public class VitalSignsHandler {
@@ -238,6 +240,29 @@ public class VitalSignsHandler {
 			System.out.println("An error occurred trying to update observation:" + code);
 			e.printStackTrace();
 		}
+	}
+	
+	public void deleteobs(String id) {
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		
+		Observation Ovital = new Observation();
+
+		// Invoke the client
+		Bundle bundle = client.search().forResource(Observation.class)
+				.where(new ReferenceClientParam("subject").hasId(id)).prettyPrint().returnBundle(Bundle.class)
+				.execute();
+
+		System.out.println("size bundle of observation TO DELETE for patient is : " + bundle.getEntry().size());
+
+		bundle.getEntry().forEach((entry) -> {
+			// populate the list with the retrieved bundle's resources
+			Observation todelete = (Observation) entry.getResource();
+			System.out.println("deleting obs resource for patient with obs id : " + todelete.getIdElement().getIdPart());
+			client.delete().resourceById(new IdDt("Observation", todelete.getIdElement().getIdPart() )).execute();
+			
+
+		});
+
 	}
 
 }

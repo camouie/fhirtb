@@ -221,5 +221,29 @@ public class DAO {
 		}
 
 	}
+	
+	public static void deletepatient(String fhirid) throws ClassNotFoundException{
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+	      try {
+	    	  DataConnect daco = new DataConnect();
+	    	  conn = daco.getConnection();
+	    	  String query = "delete from Users where fhirid = ?";
+		      ps = conn.prepareStatement(query);
+		      ps.setString(1, fhirid);
+		      
+		      ps.execute();
+		      
+		} catch (SQLException ex) {
+			System.out.println("DB delete patient error -->" + ex.getMessage());
+		}
+	      finally {
+				DataConnect.close(conn);
+			}
+	   
+	      
+	      
+	}
 
 }

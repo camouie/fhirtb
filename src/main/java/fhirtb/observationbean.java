@@ -294,6 +294,7 @@ public class observationbean {
 		}
 
 	}
+	
 
 	/*
 	 * Getters and setters methods for the bean properties

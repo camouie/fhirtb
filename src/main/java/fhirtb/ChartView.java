@@ -1,107 +1,226 @@
 package fhirtb;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpSession;
+
 import java.io.Serializable;
+import java.util.ArrayList;
+
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.primefaces.model.chart.Axis;
 import org.primefaces.model.chart.AxisType;
-import org.primefaces.model.chart.CategoryAxis;
 import org.primefaces.model.chart.LineChartModel;
-import org.primefaces.model.chart.ChartSeries;
 import org.primefaces.model.chart.LineChartSeries;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
  
 public class ChartView implements Serializable {
  
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	private LineChartModel lineModel1;
-    private LineChartModel lineModel2;
-     
+
+	private Fhircontextconnection fco;
+
+	private String serverBaseUrl;
+
+	private FhirContext ctx;
+	
+	private Patient patient;
+	
+	private ArrayList<Double> weigths;
+	
+	private ArrayList<Observation> observations;
+	
+	private String patientid;
+	
+	private Observation Obodyweight;
+	
+	private HttpSession session;
+	
     @PostConstruct
     public void init() {
+    	this.FhirCo();
+    	//get the user patient fhirid
+    	this.session = SessionUtils.getSession();
+		this.patientid = (String) this.session.getAttribute("fhirid");
+		System.out.println(">>>>>>>>> patient fhir id : " + this.patientid);
+		//initialization
+    	this.weigths = new ArrayList<Double>();
+    	this.observations = new ArrayList<Observation>();
+    	VitalSignsHandler vh = new VitalSignsHandler();
+    	this.Obodyweight = new Observation();
+    	
+    	//get the latest patient resource of the user
+    	this.getPatientbyID();
+    	
+    	this.Obodyweight = vh.getPatientVital(patient, "bodyweight");
+    			
+    	//get all the version of the patient resource available
+    	this.getallversionBodyweight();
+    	
+    	this.generateArrayWeight();
+    	
         createLineModels();
-        System.out.println("CHART VIEW BEAN ON DUTY");
     }
+    
+    public void FhirCo() {
+		this.fco = new Fhircontextconnection();
+		this.serverBaseUrl = fco.getServerBaseUrl();
+		this.ctx = fco.getCtx();
+	}
  
     public LineChartModel getLineModel1() {
         return lineModel1;
     }
- 
-    public LineChartModel getLineModel2() {
-        return lineModel2;
-    }
      
     private void createLineModels() {
-        lineModel1 = initLinearModel();
-        lineModel1.setTitle("Linear Chart");
+    	//test arraylist
+    	/*ArrayList<Integer> w = new ArrayList<>();
+    	w.add(40);
+    	w.add(60);
+    	w.add(65);
+    	*/
+    	
+        lineModel1 = initLinearModel(this.weigths);
+        lineModel1.setTitle("Your Weight Evolution");
         lineModel1.setLegendPosition("e");
+        //Weight axis
         Axis yAxis = lineModel1.getAxis(AxisType.Y);
         yAxis.setMin(0);
-        yAxis.setMax(10);
-         
-        lineModel2 = initCategoryModel();
-        lineModel2.setTitle("Category Chart");
-        lineModel2.setLegendPosition("e");
-        lineModel2.setShowPointLabels(true);
-        lineModel2.getAxes().put(AxisType.X, new CategoryAxis("Years"));
-        yAxis = lineModel2.getAxis(AxisType.Y);
-        yAxis.setLabel("Births");
-        yAxis.setMin(0);
         yAxis.setMax(200);
+        
+        Axis xAxis = lineModel1.getAxis(AxisType.X);
+        xAxis.setMin(0);
+        xAxis.setMax(this.weigths.size()-1);
+        xAxis.setTickCount(this.weigths.size());
+        xAxis.setTickFormat("%d");
+         
     }
      
-    private LineChartModel initLinearModel() {
+    private LineChartModel initLinearModel(ArrayList<Double> weights) {
         LineChartModel model = new LineChartModel();
  
         LineChartSeries series1 = new LineChartSeries();
-        series1.setLabel("Series 1");
- 
-        series1.set(1, 2);
-        series1.set(2, 1);
-        series1.set(3, 3);
-        series1.set(4, 6);
-        series1.set(5, 8);
- 
-        LineChartSeries series2 = new LineChartSeries();
-        series2.setLabel("Series 2");
- 
-        series2.set(1, 6);
-        series2.set(2, 3);
-        series2.set(3, 2);
-        series2.set(4, 7);
-        series2.set(5, 9);
- 
+        series1.setLabel("Weight");
+        
+        for(int i =0; i<weights.size(); i++){
+        	 series1.set(i, weights.get(i));
+        }
         model.addSeries(series1);
-        model.addSeries(series2);
          
         return model;
     }
-     
-    private LineChartModel initCategoryModel() {
-        LineChartModel model = new LineChartModel();
- 
-        ChartSeries boys = new ChartSeries();
-        boys.setLabel("Boys");
-        boys.set("2004", 120);
-        boys.set("2005", 100);
-        boys.set("2006", 44);
-        boys.set("2007", 150);
-        boys.set("2008", 25);
- 
-        ChartSeries girls = new ChartSeries();
-        girls.setLabel("Girls");
-        girls.set("2004", 52);
-        girls.set("2005", 60);
-        girls.set("2006", 110);
-        girls.set("2007", 90);
-        girls.set("2008", 120);
- 
-        model.addSeries(boys);
-        model.addSeries(girls);
-         
-        return model;
+    
+    public void getallversionBodyweight(){
+    	Patient p = this.patient;
+    	Observation bw = this.Obodyweight;
+    	
+    	String v = bw.getMeta().getVersionId();
+    	int version = Integer.parseInt(v);
+    	System.out.println("<<<<<<<<<<<<< VERSION OF RESOURCE = " + version);
+
+    	IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+		ArrayList <Observation> obs = new ArrayList<Observation>();
+		
+    	for(int i = version; i>0; i--){
+    		String currentversion = String.valueOf(i);
+    			
+    		Observation ob = client.read()
+                    .resource(Observation.class)
+                    .withIdAndVersion(bw.getIdElement().getIdPart(), currentversion)
+                    .execute();
+    			
+    			obs.add(ob);
+    			System.out.println("\\\\\\\\\\\\\\ found id version : "+ob.getMeta().getVersionId());
+    	}
+    	
+    	this.observations = obs;
+    	System.out.println("-- set obs list with all versions of obs resource from server");
+    	
     }
+    
+    private void getPatientbyID() {
+
+		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
+
+		try {
+			Bundle response = client.search().forResource(Patient.class)
+					.where(new TokenClientParam("_id").exactly().code(this.patientid)).prettyPrint()
+					.returnBundle(Bundle.class).execute();
+
+			this.setPatient((Patient) response.getEntry().get(0).getResource());
+
+		} catch (Exception e) {
+			System.out.println("An error occurred trying to search for patient by id:");
+			e.printStackTrace();
+		}
+	}
+    
+    public void generateArrayWeight(){
+    	for(int i = this.observations.size()-1; i>=0; i--){
+    		Observation ob = observations.get(i);
+    		if (ob.hasValueQuantity()) {
+    			try {
+					Double bodyWeight = ob.getValueQuantity().getValueElement().getValueAsNumber().doubleValue();
+					this.weigths.add(bodyWeight);
+					
+				} catch (FHIRException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    	}
+    }
+    
+    /*
+     * getter and setters
+     */
+    
+
+	public Patient getPatient() {
+		return patient;
+	}
+
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
+
+	public ArrayList<Double> getWeigths() {
+		return weigths;
+	}
+
+	public void setWeigths(ArrayList<Double> weigths) {
+		this.weigths = weigths;
+	}
+
+	public String getPatientid() {
+		return patientid;
+	}
+
+	public void setPatientid(String patientid) {
+		this.patientid = patientid;
+	}
+
+	public ArrayList<Observation> getObservations() {
+		return observations;
+	}
+
+	public void setObservations(ArrayList<Observation> observations) {
+		this.observations = observations;
+	}
+
+	public Observation getObodyweight() {
+		return Obodyweight;
+	}
+
+	public void setObodyweight(Observation obodyweight) {
+		Obodyweight = obodyweight;
+	} 
  
 }

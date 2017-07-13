@@ -393,6 +393,7 @@ public class patientbean {
 		DAO dao = new DAO();
 		dao.addPatientAccount(this.email, this.password, this.patientid, this.doctorid);
 	}
+
 	/*
 	 * Getters and setters methods
 	 */

@@ -5,10 +5,10 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 
 public class Fhircontextconnection {
 	//FHIR TEST SERVER HAPI
-	private String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
+	//private String serverBaseUrl = "http://fhirtest.uhn.ca/baseDstu3";
 	
 	//PRIVATE SERVER TEST
- 	//private String serverBaseUrl = "http://213.136.91.24:8080/hapi-fhir-jpaserver-example/baseDstu3";
+ 	private String serverBaseUrl = "http://213.136.91.24:8080/hapi-fhir-jpaserver-example/baseDstu3";
  		
 	// private String serverBaseUrl = "https://fhirtest.uhn.ca/baseDstu2";
 	// private String serverBaseUrl = "http://spark.furore.com/fhir";

@@ -34,6 +34,31 @@ public class DAO {
 		}
 		return false;
 	}
+	
+	public static boolean userExists(String user) throws ClassNotFoundException {
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		try {
+			DataConnect daco = new DataConnect();
+			con = daco.getConnection();
+			ps = con.prepareStatement("Select username from Users where username = ?");
+			ps.setString(1, user);
+
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				// result found, means valid inputs
+				return true;
+			}
+		} catch (SQLException ex) {
+			System.out.println("DB username exists error -->" + ex.getMessage());
+			return false;
+		} finally {
+			DataConnect.close(con);
+		}
+		return false;
+	}
 
 	public static void addPractitionerAccount(String uname, String pwd, String fhirid) throws ClassNotFoundException {
 		Connection con = null;

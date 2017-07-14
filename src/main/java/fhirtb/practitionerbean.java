@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -45,7 +47,7 @@ public class practitionerbean {
 	 * add a practitioner resource onto the server taking parameters taken from
 	 * the bean proprety
 	 */
-	public String addPractitioner() {
+	public String addPractitioner() throws ClassNotFoundException {
 
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
@@ -76,7 +78,9 @@ public class practitionerbean {
 		telecom.add(tel);
 
 		this.practitioner.setTelecom(telecom);
-
+		
+		boolean userExists = DAO.userExists(this.email);
+		if(!userExists){
 		try {
 			MethodOutcome outcome = client.create().resource(this.practitioner).prettyPrint().encodedJson().execute();
 
@@ -96,9 +100,17 @@ public class practitionerbean {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 
 		viewNavigation vn = new viewNavigation();
 		return vn.goHome();
+		}
+		else{
+			System.out.println("user already exists for Practitioner");
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
+					"Username already exists", "Please enter another username or login with existing one"));
+			return "addPractitioner";
+		}
 
 	}
 

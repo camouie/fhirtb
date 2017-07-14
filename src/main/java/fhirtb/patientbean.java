@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 
+import org.hl7.fhir.dstu3.model.Account;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -316,6 +319,15 @@ public class patientbean {
 		
 		System.out.println("doctor added has name : " + this.doctor.getNameFirstRep().getFamily());
 		System.out.println("DOCTOR SET FOR PATIENT");
+		
+		boolean userexist = DAO.userExists(this.email);
+		if(userexist){
+			System.out.println("user already exists");
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
+					"Username already exists", "Please enter another username or login with existing one"));
+			return "addPatient";
+		}
+			
 
 		try {
 			MethodOutcome outcome = client.create().resource(this.patient).prettyPrint().encodedJson().execute();
@@ -337,7 +349,7 @@ public class patientbean {
 
 		viewNavigation vn = new viewNavigation();
 		return vn.goHome();
-
+		
 	}
 
 
@@ -395,6 +407,7 @@ public class patientbean {
 	public void createPatientAccount() throws ClassNotFoundException {
 		DAO dao = new DAO();
 		dao.addPatientAccount(this.email, this.password, this.patientid, this.doctorid);
+
 	}
 	
 	public String delete(String fhirid){

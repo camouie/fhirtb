@@ -1,6 +1,7 @@
 package fhirtb;
 
 import javax.annotation.PostConstruct;
+import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 
 import java.io.Serializable;
@@ -48,8 +49,14 @@ public class ChartView implements Serializable {
     	this.FhirCo();
     	//get the user patient fhirid
     	this.session = SessionUtils.getSession();
+    	if (session.getAttribute("role").equals("doctor")) {
 		this.patientid = (String) this.session.getAttribute("fhirid");
 		System.out.println(">>>>>>>>> patient fhir id : " + this.patientid);
+    	}
+    	else{
+    		this.patientid = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
+					.get("pid");
+    	}
 		//initialization
     	this.weigths = new ArrayList<Double>();
     	this.observations = new ArrayList<Observation>();

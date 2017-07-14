@@ -12,7 +12,23 @@
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js" />
 <h:outputScript name="resources/bootstrap/js/bootstrap.js" />
+<style type="text/css">
+.col-md-offset-2 {
+	margin-left: 0px;
+}
 
+.col-md-6 {
+	width: 70%;
+}
+
+.row col-md-6 col-md-offset-2 custyle {
+	margin-left: 0px;
+}
+
+#wspacer {
+	width: 2px;
+}
+</style>
 </head>
 
 <ui:composition template="/WEB-INF/templates/BasicTemplate.xhtml">
@@ -32,7 +48,8 @@
 </h:commandLink>
 			<br />
 
-			<div class="row col-md-6 col-md-offset-2 custyle">
+			<div class="row col-md-6 col-md-offset-2 custyle"
+				style="margin-left: 0px; width: 60%">
 				<table class="table table-striped custab">
 					<thead>
 						<tr>
@@ -57,16 +74,20 @@
 									<f:convertDateTime pattern="dd.MM.yyyy" />
 								</h:outputText></td>
 
-							<td class="text-center">
-							<h:link value="Edit"
+							<td class="text-center"><h:link value="Edit"
 									outcome="patient" class='btn btn-info btn-xs'>
 									<f:param name="logicalid" value="#{putid.value}"></f:param>
 
-								</h:link>
-									
-						<h:commandLink value="Delete"
-								action="#{patientbean.delete(putid.value)}" rendered="#{loginbean.admin}" styleClass="btn btn-danger btn-xs"/>			
-							</td>
+								</h:link></td>
+							<td class="text-center"><h:link value="Weight Tracker"
+									outcome="weight" class='btn btn-info btn-xs'>
+									<f:param name="pid" value="#{putid.value}"></f:param>
+
+								</h:link></td>
+							<td class="text-center"><h:commandLink value="Delete"
+									action="#{patientbean.delete(putid.value)}"
+									rendered="#{loginbean.admin}"
+									styleClass="btn btn-danger btn-xs" /></td>
 
 
 						</tr>

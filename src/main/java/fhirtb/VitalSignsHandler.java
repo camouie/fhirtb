@@ -3,15 +3,21 @@ package fhirtb;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.SimpleQuantity;
+import org.hl7.fhir.dstu3.model.codesystems.NarrativeStatus;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.xhtml.NodeType;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
@@ -46,7 +52,12 @@ public class VitalSignsHandler {
 		Observation observation = new Observation();
 
 		observation.setSubject(new Reference(patient));
+		observation.setStatus(ObservationStatus.FINAL);
+		Narrative text = new Narrative();
+		observation.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		observation.getText().setDivAsString("<div>Vital sign Observation<br/> of patient : "+ patient.getNameFirstRep().getFamily() + "</div>");
 
+		
 		// creation of Body Weight vital sign observation resource
 		if (code.equals("bodyweight")) {
 			// Give the observation a code (what kind of observation is this)

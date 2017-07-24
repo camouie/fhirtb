@@ -138,11 +138,15 @@ public class VitalSignsHandler {
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 
 		try {
+			System.out.println("=============== observation ID RETIEVED FOR SEARCH " + observationID);
+			
 			Bundle response = client.search().forResource(Observation.class)
 					.where(new TokenClientParam("_id").exactly().code(observationID)).prettyPrint()
 					.returnBundle(Bundle.class).execute();
 
 			Ovital = (Observation) response.getEntry().get(0).getResource();
+			
+			
 			System.out.println("Obodyvital retrieve by id in class and is at " + Ovital.getId());
 
 		} catch (Exception e) {

@@ -47,12 +47,15 @@ public class ChartView implements Serializable {
     @PostConstruct
     public void init() {
     	this.FhirCo();
+    	System.out.println("CHART BEAN REPORTING FOR DUTY");
     	//get the user patient fhirid
     	this.session = SessionUtils.getSession();
-    	if (session.getAttribute("role").equals("doctor")) {
+    	
+    	if (session.getAttribute("role").equals("patient")) {
 		this.patientid = (String) this.session.getAttribute("fhirid");
 		System.out.println(">>>>>>>>> patient fhir id : " + this.patientid);
     	}
+    	
     	else{
     		this.patientid = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap()
 					.get("pid");
@@ -129,8 +132,9 @@ public class ChartView implements Serializable {
     	Observation bw = this.Obodyweight;
     	
     	String v = bw.getMeta().getVersionId();
+    	System.out.println("nbr of versions found " + bw.getMeta().getVersionId());
     	int version = Integer.parseInt(v);
-    	System.out.println("<<<<<<<<<<<<< VERSION OF RESOURCE = " + version);
+    	System.out.println("<<<<<<<<<<<<< VERSIONS OF RESOURCE in INT = " + version);
 
     	IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
 		ArrayList <Observation> obs = new ArrayList<Observation>();

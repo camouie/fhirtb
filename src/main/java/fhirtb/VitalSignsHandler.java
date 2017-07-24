@@ -1,5 +1,10 @@
 package fhirtb;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -56,7 +61,7 @@ public class VitalSignsHandler {
 		Narrative text = new Narrative();
 		observation.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		observation.getText().setDivAsString("<div>Vital sign Observation<br/> of patient : "+ patient.getNameFirstRep().getFamily() + "</div>");
-
+		observation.setIssued(new Date());
 		
 		// creation of Body Weight vital sign observation resource
 		if (code.equals("bodyweight")) {

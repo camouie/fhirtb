@@ -358,23 +358,12 @@ public class patientbean {
 	 * retrieve a Doctor resource given its ID
 	 */
 	public void getSelectedDoctorbyID() {
+		//read interaction
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
-		try {
-			Bundle response = client.search().forResource(Practitioner.class)
-					.where(new TokenClientParam("_id").exactly().code(this.doctorid)).prettyPrint()
-					.returnBundle(Bundle.class).execute();
-
-			System.out.println("Found the selected doctor on the server for patient. doctor id : " + doctorid);
-
-			Practitioner p = (Practitioner) response.getEntry().get(0).getResource();
-			System.out.println(
-					"-----doctor set from server to bean doctor with name = " + p.getNameFirstRep().getFamily());
-			this.setDoctor(p);
-
-		} catch (Exception e) {
-			System.out.println("An error occurred trying to search:");
-			e.printStackTrace();
-		}
+		this.doctor = client.read()
+                .resource(Practitioner.class)
+                .withId(this.doctorid)
+                .execute(); 
 	}
 
 	/*
@@ -390,11 +379,13 @@ public class patientbean {
 					.returnBundle(Bundle.class).execute();
 
 			this.setPatient((Patient) response.getEntry().get(0).getResource());
+			
 			VitalSignsHandler vh = new VitalSignsHandler();
 			vh.CreateVitalResource(this.patient, 0.0, "bodyweight");
 			vh.CreateVitalResource(this.patient, 0.0, "bodyheight");
 			vh.CreateVitalResource(this.patient, 0.0, "heartrate");
 
+			
 		} catch (Exception e) {
 			System.out.println("An error occurred trying to search:");
 			e.printStackTrace();

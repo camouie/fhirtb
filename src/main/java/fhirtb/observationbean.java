@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 
@@ -120,9 +121,11 @@ public class observationbean {
 		if (logicalID != null) {
 			// get the patient from the server with its id in order to update
 			// the patient on save button
+			System.out.println("-- -- -- assigning the patient attribute");
 			this.getPatientbyID();
 			// get the existing vital sign resources from server or create ones
 			// if none existing
+			System.out.println("-- -- -- assigning the obs resouces attributes");
 			this.SetBodyWeightResource();
 			this.SetBodyHeightResource();
 			this.SetHeartRateResource();
@@ -139,23 +142,18 @@ public class observationbean {
 	private void getPatientbyID() {
 
 		IGenericClient client = ctx.newRestfulGenericClient(serverBaseUrl);
-
-		try {
-			Bundle response = client.search().forResource(Patient.class)
-					.where(new TokenClientParam("_id").exactly().code(this.logicalID)).prettyPrint()
-					.returnBundle(Bundle.class).execute();
-
-			this.setPatient((Patient) response.getEntry().get(0).getResource());
+		
+		this.patient = client.read()
+                .resource(Patient.class)
+                .withId(this.logicalID)
+                .execute();
+		
 			// set the bean properties with the patient resource values
 			this.firstname = this.patient.getNameFirstRep().getGivenAsSingleString();
 			this.lastname = this.patient.getNameFirstRep().getFamily();
 			this.birthdate = this.patient.getBirthDate();
 			this.prefix = this.patient.getNameFirstRep().getPrefixAsSingleString();
 
-		} catch (Exception e) {
-			System.out.println("An error occurred trying to search:");
-			e.printStackTrace();
-		}
 	}
 
 	/*

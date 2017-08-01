@@ -121,11 +121,9 @@ public class observationbean {
 		if (logicalID != null) {
 			// get the patient from the server with its id in order to update
 			// the patient on save button
-			System.out.println("-- -- -- assigning the patient attribute");
 			this.getPatientbyID();
 			// get the existing vital sign resources from server or create ones
 			// if none existing
-			System.out.println("-- -- -- assigning the obs resouces attributes");
 			this.SetBodyWeightResource();
 			this.SetBodyHeightResource();
 			this.SetHeartRateResource();

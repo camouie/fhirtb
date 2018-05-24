@@ -206,7 +206,6 @@ public class observationbean {
 			// ask for the resource on the server and set the bean property with
 			// it
 			this.setOheartrate(bwhandler.getPatientVitalsbyID(this.heartrateID));
-			System.out.println("jfkshdfh");
 		}
 
 	}
